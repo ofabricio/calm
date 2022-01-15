@@ -41,8 +41,8 @@ func TestRewind(t *testing.T) {
 		ok bool
 		mf MatcherFunc
 	}{
-		{"a", true, S("a").Rewind()},
-		{"bb", false, And(S("b"), S("a")).Not().Rewind().Not()},
+		{"a", true, S("a").Not().Rewind().Not()},
+		{"bb", false, And(S("b"), S("a")).Rewind()},
 	}
 
 	for _, tc := range tt {

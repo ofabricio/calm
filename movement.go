@@ -15,13 +15,14 @@ func (m MatcherFunc) Next() MatcherFunc {
 }
 
 // Rewind rewinds the cursor back to the
-// begining of the matched token.
+// begining of the current matcher if it
+// returns false.
 func (m MatcherFunc) Rewind() MatcherFunc {
 	return func(c *Code) bool {
-		if ini := c.Mark(); m(c) {
+		if ini := c.Mark(); !m(c) {
 			c.Back(ini)
-			return true
+			return false
 		}
-		return false
+		return true
 	}
 }

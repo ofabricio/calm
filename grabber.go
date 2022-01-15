@@ -15,14 +15,16 @@ func (m MatcherFunc) EmitMany(ts *[]Token) MatcherFunc {
 	})
 }
 
-// EmitUndo can be used to undo (remove) tokens emitted by EmitMany.
+// EmitUndo can be used to undo (remove) the tokens
+// grabbed by GrabMany. It removes when the current
+// matcher returns false.
 func (m MatcherFunc) EmitUndo(ts *[]Token) MatcherFunc {
 	return func(c *Code) bool {
-		if ini := len(*ts); m(c) {
+		if ini := len(*ts); !m(c) {
 			*ts = (*ts)[0:ini]
-			return true
+			return false
 		}
-		return false
+		return true
 	}
 }
 
@@ -41,14 +43,16 @@ func (m MatcherFunc) GrabMany(s *[]string) MatcherFunc {
 	})
 }
 
-// GrabUndo can be used to undo (remove) tokens grabbed by GrabMany.
+// GrabUndo can be used to undo (remove) the tokens
+// grabbed by GrabMany. It removes when the current
+// matcher returns false.
 func (m MatcherFunc) GrabUndo(ts *[]string) MatcherFunc {
 	return func(c *Code) bool {
-		if ini := len(*ts); m(c) {
+		if ini := len(*ts); !m(c) {
 			*ts = (*ts)[0:ini]
-			return true
+			return false
 		}
-		return false
+		return true
 	}
 }
 

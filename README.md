@@ -329,8 +329,8 @@ var expr Wrap
 
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), &expr, S(")")), value)
-Or(And(factor, S("*"), &term).Not().Rewind().Not(), factor).Recursive(&term)
-Or(And(&term, S("+"), &expr).Not().Rewind().Not(), &term).Recursive(&expr)
+Or(And(factor, S("*"), &term).Rewind(), factor).Recursive(&term)
+Or(And(&term, S("+"), &expr).Rewind(), &term).Recursive(&expr)
 
 ok := c.Run(&expr)
 
@@ -353,12 +353,17 @@ There is also a static version of `Next`.
 
 ## Rewind
 
-Rewind rewinds the cursor back to the begining of the matched token.
+Rewind rewinds the cursor back to the
+begining of the current matcher if it
+returns false.
 
 ```go
 c := New("hello world")
 
-ok := c.Run(And(S("hello").Rewind(), S("hello world")))
+ok := c.Run(And(
+    And(S("hello"), S("world")).Rewind().True(),
+    S("hello world"),
+))
 
 fmt.Println(ok) // true
 ```
@@ -394,6 +399,7 @@ Note that GrabMany might repeat tokens depending on the logic used.
 ## GrabUndo
 
 GrabUndo can be used to undo (remove) tokens grabbed by GrabMany.
+It removes when the current matcher returns false.
 This is usually used along with [Rewind](#Rewind),
 since when a match rewinds you might want to discard grabbed tokens.
 See an example [here](grabber_test.go).
@@ -442,6 +448,7 @@ Note that EmitMany might repeat tokens depending on the logic used.
 ## EmitUndo
 
 EmitUndo can be used to undo (remove) tokens emitted by EmitMany.
+It removes when the current matcher returns false.
 This is usually used along with [Rewind](#Rewind),
 since when a match rewinds you might want to discard emitted tokens.
 See an example [here](grabber_test.go).

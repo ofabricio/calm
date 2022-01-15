@@ -71,8 +71,8 @@ func TestEmitUndo(t *testing.T) {
 	value := F(unicode.IsNumber).EmitMany(&tokens)
 	factor := Or(And(S("(").EmitMany(&tokens), &expr, S(")").EmitMany(&tokens)), value)
 
-	Or(And(factor, S("*").EmitMany(&tokens), &term).Not().Rewind().EmitUndo(&tokens).Not(), factor).Recursive(&term)
-	Or(And(&term, S("+").EmitMany(&tokens), &expr).Not().Rewind().EmitUndo(&tokens).Not(), &term).Recursive(&expr)
+	Or(And(factor, S("*").EmitMany(&tokens), &term).Rewind().EmitUndo(&tokens), factor).Recursive(&term)
+	Or(And(&term, S("+").EmitMany(&tokens), &expr).Rewind().EmitUndo(&tokens), &term).Recursive(&expr)
 
 	ok := c.Run(&expr)
 
@@ -141,8 +141,8 @@ func TestGrabUndo(t *testing.T) {
 	value := F(unicode.IsNumber).GrabMany(&tokens)
 	factor := Or(And(S("(").GrabMany(&tokens), &expr, S(")").GrabMany(&tokens)), value)
 
-	Or(And(factor, S("*").GrabMany(&tokens), &term).Not().Rewind().GrabUndo(&tokens).Not(), factor).Recursive(&term)
-	Or(And(&term, S("+").GrabMany(&tokens), &expr).Not().Rewind().GrabUndo(&tokens).Not(), &term).Recursive(&expr)
+	Or(And(factor, S("*").GrabMany(&tokens), &term).Rewind().GrabUndo(&tokens), factor).Recursive(&term)
+	Or(And(&term, S("+").GrabMany(&tokens), &expr).Rewind().GrabUndo(&tokens), &term).Recursive(&expr)
 
 	ok := c.Run(&expr)
 
