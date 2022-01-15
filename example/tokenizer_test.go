@@ -18,8 +18,6 @@ func Example() {
 		fmt.Println("Hello, 世界")
 	}`
 
-	c := New(src)
-
 	print := func(t Token) {
 		fmt.Printf("'%s' Row: %d Col: %d\n", t.Text, t.Row, t.Col)
 	}
@@ -32,7 +30,7 @@ func Example() {
 
 	code := Or(newl, spac, strs, word, rest).ZeroToMany()
 
-	ok := c.Run(code)
+	ok := New(src).Run(code)
 
 	fmt.Println(ok)
 

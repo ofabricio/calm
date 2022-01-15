@@ -138,7 +138,7 @@ fmt.Println(a, b, c) // true true false
 
 ## SR
 
-SR behaves exactly the same as `S` but receives a string reference as argument.
+SR behaves exactly the same as [S](#S) but receives a string reference as argument.
 
 ## Eq
 
@@ -478,7 +478,7 @@ fmt.Println(a, b, c) // true true false
 
 ## Debug
 
-Debug is an util that prints debug info to the stdout.
+Debug prints debug info to the stdout.
 
 ```go
 c := New("Hi")
@@ -492,8 +492,7 @@ c.Run(F(unicode.IsLetter).Debug().OneToMany())
 
 ## String
 
-String is an util that parses a common string definition.
-It allows quote escaping.
+String parses a common string definition. It allows quote escaping.
 
 ```go
 c := New(`He said "Wow!" and "This is cool!" when he saw this.`)
