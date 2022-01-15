@@ -108,6 +108,9 @@ func Test_End_Of_Source_Code(t *testing.T) {
 		//
 		{"", Eq("i").Next(), false, false},
 		{"i", Eq("i").Next(), true, false},
+		//
+		{"", Next(), false, false},
+		{"i", Next(), true, false},
 	}
 
 	for _, tc := range tt {
