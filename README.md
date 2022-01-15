@@ -2,6 +2,8 @@
 
 This is a library to scan, match, parse and tokenize text.
 
+[![Go](https://github.com/ofabricio/calm/actions/workflows/go.yml/badge.svg)](https://github.com/ofabricio/calm/actions/workflows/go.yml)
+
 ### Note
 
 Use [issues](https://github.com/ofabricio/calm/issues) only to report bugs.
