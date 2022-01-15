@@ -19,37 +19,36 @@ func Example() {
 	}`
 
 	print := func(t Token) {
-		fmt.Printf("'%s' Row: %d Col: %d\n", t.Text, t.Row, t.Col)
+		fmt.Printf("Pos: %-3d Line: %-2d Column: %-3d Token: %s\n", t.Pos, t.Row, t.Col, t.Text)
 	}
 
-	newl := S("\n")
 	spac := F(unicode.IsSpace)
-	strs := String(`"`).On(print)
+	strg := String(`"`).On(print)
 	word := F(unicode.IsLetter).OneToMany().On(print)
-	rest := F(unicode.IsLetter).Not().Next().On(print)
+	rest := Next().On(print)
 
-	code := Or(newl, spac, strs, word, rest).ZeroToMany()
+	code := Or(spac, strg, word, rest).ZeroToMany()
 
 	ok := New(src).Run(code)
 
 	fmt.Println(ok)
 
 	// Output:
-	// 'package' Row: 2 Col: 2
-	// 'main' Row: 2 Col: 10
-	// 'import' Row: 4 Col: 2
-	// '"fmt"' Row: 4 Col: 9
-	// 'func' Row: 6 Col: 2
-	// 'main' Row: 6 Col: 7
-	// '(' Row: 6 Col: 11
-	// ')' Row: 6 Col: 12
-	// '{' Row: 6 Col: 14
-	// 'fmt' Row: 7 Col: 3
-	// '.' Row: 7 Col: 6
-	// 'Println' Row: 7 Col: 7
-	// '(' Row: 7 Col: 14
-	// '"Hello, 世界"' Row: 7 Col: 15
-	// ')' Row: 7 Col: 26
-	// '}' Row: 8 Col: 2
+	// Pos: 2   Line: 2  Column: 2   Token: package
+	// Pos: 10  Line: 2  Column: 10  Token: main
+	// Pos: 17  Line: 4  Column: 2   Token: import
+	// Pos: 24  Line: 4  Column: 9   Token: "fmt"
+	// Pos: 32  Line: 6  Column: 2   Token: func
+	// Pos: 37  Line: 6  Column: 7   Token: main
+	// Pos: 41  Line: 6  Column: 11  Token: (
+	// Pos: 42  Line: 6  Column: 12  Token: )
+	// Pos: 44  Line: 6  Column: 14  Token: {
+	// Pos: 48  Line: 7  Column: 3   Token: fmt
+	// Pos: 51  Line: 7  Column: 6   Token: .
+	// Pos: 52  Line: 7  Column: 7   Token: Println
+	// Pos: 59  Line: 7  Column: 14  Token: (
+	// Pos: 60  Line: 7  Column: 15  Token: "Hello, 世界"
+	// Pos: 75  Line: 7  Column: 26  Token: )
+	// Pos: 78  Line: 8  Column: 2   Token: }
 	// true
 }
