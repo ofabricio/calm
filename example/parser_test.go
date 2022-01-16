@@ -34,7 +34,7 @@ func ExampleGoProgram() {
 
 	// Output:
 	// Package: main
-	// Imports: [fmt]
+	// Imports: ["fmt"]
 	// Comments: [// You can edit this code! // Click here and start typing.]
 	// Functions: [{main [fmt.Println("Hello, 世界")]}]
 	// Ok: true
@@ -81,35 +81,19 @@ func (t *GoProgram) function() MatcherFunc {
 }
 
 func (t *GoProgram) statement(body *[]string) MatcherFunc {
-	return And(
-		t.ws(),
-		Until(Eq("\n"), Eq("}")).GrabMany(body),
-	)
+	return And(t.ws(), Until(Eq("\n"), Eq("}")).GrabMany(body))
 }
 
 func (t *GoProgram) imports(name *[]string) MatcherFunc {
-	return And(
-		t.ws(),
-		S("import "),
-		S("\""),
-		t.name().GrabMany(name),
-		S("\""),
-	)
+	return And(t.ws(), S("import "), String(`"`).GrabMany(name))
 }
 
 func (t *GoProgram) packageName(name *string) MatcherFunc {
-	return And(
-		t.ws(),
-		S("package "),
-		t.name().Grab(name),
-	)
+	return And(t.ws(), S("package "), t.name().Grab(name))
 }
 
 func (t *GoProgram) comment() MatcherFunc {
-	return And(
-		t.ws(),
-		And(S("//"), Until(Eq("\n"))).GrabMany(&t.Comments),
-	).ZeroToMany()
+	return And(t.ws(), And(S("//"), Until(Eq("\n")).True()).GrabMany(&t.Comments)).ZeroToMany()
 }
 
 func (t *GoProgram) name() MatcherFunc {
