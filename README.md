@@ -10,7 +10,9 @@ Use [issues](https://github.com/ofabricio/calm/issues) only to report bugs.
 Use [discussions](https://github.com/ofabricio/calm/discussions) for everything else.
 Don't open PRs.
 
-### Example
+## Examples
+
+### Tokenizer
 
 Example of a very simple and incomplete tokenizer for Go code.
 
@@ -70,6 +72,12 @@ func main() {
 }
 ```
 
+### Parser 
+
+Example of a very simple and incomplete parser for Go code.
+
+This code is a bit big, so check it out in [example/parser_test.go](example/parser_test.go).
+
 See more examples in the [example](/example) folder.
 
 ## How it works
@@ -78,7 +86,7 @@ Each time a match happens it moves the cursor to the next character.
 
 If there is no match the cursor doesn't move.
 
-Only `S` and `F` operators move the cursor on a match.
+Only `S` and `F` operators move the cursor when they match.
 
 There are many kinds of operators: conditional execution, repetition, recursion, etc.
 
@@ -91,6 +99,7 @@ Some operators can move the cursor back and forth.
 - [x] [S](#S)
 - [x] [SR](#SR)
 - [x] [F](#F)
+- [ ] Regex
 
 #### Tester
 
