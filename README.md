@@ -420,8 +420,8 @@ returns false.
 ```go
 c := New("hello world")
 
-ok := c.Run(And(
-    And(S("hello"), S("world")).Rewind().True(),
+ok := c.Run(Or(
+    And(S("hello"), S("world")).Rewind(),
     S("hello world"),
 ))
 
