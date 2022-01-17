@@ -1,6 +1,6 @@
 # Calm
 
-This is a library to scan, match, parse and tokenize text.
+This is a library to scan, parse and tokenize text.
 
 [![Go](https://github.com/ofabricio/calm/actions/workflows/go.yml/badge.svg)](https://github.com/ofabricio/calm/actions/workflows/go.yml)
 
@@ -14,7 +14,7 @@ Don't open PRs.
 
 ### Tokenizer
 
-Example of a very simple and incomplete tokenizer for Go code.
+Example of a very simple tokenizer for Go code.
 
 ```go
 package main
@@ -72,10 +72,10 @@ func main() {
 }
 ```
 
-### Parser 
+### Parser
 
-- For a very simple and incomplete expression parser example see [example/expression_test.go](example/expression_test.go).
-- For a very simple and incomplete Go code parser example see [example/parser_test.go](example/parser_test.go).
+- For a very simple expression parser example see [example/expression_test.go](example/expression_test.go).
+- For a very simple Go code parser example see [example/parser_test.go](example/parser_test.go).
 
 See more examples in the [example](/example) folder.
 
