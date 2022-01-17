@@ -82,15 +82,53 @@ See more examples in the [example](/example) folder.
 
 ## How it works
 
-Each time a match happens it moves the cursor to the next character.
+When a match happens the cursor moves to the next character.
 
 If there is no match the cursor doesn't move.
 
-Only `S` and `F` operators move the cursor when they match.
-
 There are many kinds of operators: conditional execution, repetition, recursion, etc.
 
+Not all operators move the cursor.
+
 Some operators can move the cursor back and forth.
+
+### Deeper look
+
+Suppose the code below and the input `HelloWorld`:
+
+```go
+And(S("Hello"), S("World"))
+```
+
+The starting state is this:
+
+```
+HelloWorld
+^
+```
+
+`And` operator will test its arguments applying an AND logic to them.
+The first argument is `S("Hello")`.
+`S` will test `Hello` against the first characters of the input,
+if they match it moves the cursor and returns true:
+
+```
+HelloWorld
+     ^
+```
+
+`And` saw that the first argument returned true so it moves to the next argument `S("World")`.
+`S` will test `World` against the characters in the current position of the input,
+if they match it moves the cursor and returns true:
+
+```
+HelloWorld
+          ^
+```
+
+If there was no match the cursor would stay on the `W` character and `S` would return false.
+
+`And` sees that both arguments returned true, so it returns true and we are at the end of the input.
 
 ## Operators
 
