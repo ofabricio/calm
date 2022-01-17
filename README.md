@@ -130,6 +130,7 @@ Some operators can move the cursor back and forth.
 #### Movement
 
 - [x] [Next](#Next)
+- [x] [Undo](#Undo)
 - [x] [Rewind](#Rewind)
 
 #### Grabber
@@ -393,9 +394,26 @@ fmt.Println(ok) // true
 
 There is also a static version of `Next`.
 
+## Undo
+
+Undo sends the cursor back to the
+begining of the current matcher if it
+returns true.
+
+```go
+c := New("hello world")
+
+ok := c.Run(And(
+    S("hello").Undo(),
+    S("hello world"),
+))
+
+fmt.Println(ok) // true
+```
+
 ## Rewind
 
-Rewind rewinds the cursor back to the
+Rewind sends the cursor back to the
 begining of the current matcher if it
 returns false.
 

@@ -34,7 +34,7 @@ func TestNext(t *testing.T) {
 	}
 }
 
-func TestRewind(t *testing.T) {
+func TestRewind_and_Undo(t *testing.T) {
 
 	tt := []struct {
 		in string
@@ -43,6 +43,9 @@ func TestRewind(t *testing.T) {
 	}{
 		{"a", true, S("a").Not().Rewind().Not()},
 		{"bb", false, And(S("b"), S("a")).Rewind()},
+		//
+		{"a", true, S("a").Undo()},
+		{"bb", false, And(S("b"), S("a")).Not().Undo().Not()},
 	}
 
 	for _, tc := range tt {
