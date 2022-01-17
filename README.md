@@ -74,9 +74,8 @@ func main() {
 
 ### Parser 
 
-Example of a very simple and incomplete parser for Go code.
-
-This code is a bit big, so check it out in [example/parser_test.go](example/parser_test.go).
+- For a very simple and incomplete expression parser example see [example/expression_test.go](example/expression_test.go).
+- For a very simple and incomplete Go code parser example see [example/parser_test.go](example/parser_test.go).
 
 See more examples in the [example](/example) folder.
 
@@ -404,10 +403,6 @@ c := New("0+1*(2+3)*4")
 var term Wrap
 var expr Wrap
 
-// <expr> = <term> '+' <expr> | <term>
-// <term> = <factor> '*' <term> | <factor>
-// <factor> = '(' <expr> ')' | <value>
-
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), &expr, S(")")), value)
 Or(And(factor, S("*"), &term).Rewind(), factor).Recursive(&term)
@@ -417,6 +412,9 @@ ok := c.Run(&expr)
 
 fmt.Println(ok) // true
 ```
+
+See [here](example/expression_test.go) another example on how to recursively
+parse an expression without using this recursive operator.
 
 ## Next
 
