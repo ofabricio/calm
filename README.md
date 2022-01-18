@@ -223,6 +223,7 @@ fmt.Println(a, b, c) // true true false
 ## SR
 
 SR behaves exactly the same as [S](#S) but receives a string reference as argument.
+This allows [Back Reference](#Back-Reference).
 
 ## Eq
 
