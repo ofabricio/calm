@@ -66,7 +66,7 @@ func factor(e *Expression) MatcherFunc {
 }
 
 func value(e *Expression) MatcherFunc {
-	return F(unicode.IsNumber).Grab(&e.V)
+	return F(unicode.IsNumber).On(Grab(&e.V))
 }
 
 func (e *Expression) print(pad int) {

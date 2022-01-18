@@ -1,70 +1,9 @@
 package calm
 
-// Emit captures the current token and fills t with it.
-func (m MatcherFunc) Emit(t *Token) MatcherFunc {
-	return m.On(func(tk Token) {
-		*t = tk
-	})
-}
-
-// EmitMany captures the current token and adds it to a slice.
-// Note that tokens might repeat depending on the logic.
-func (m MatcherFunc) EmitMany(ts *[]Token) MatcherFunc {
-	return m.On(func(t Token) {
-		*ts = append(*ts, t)
-	})
-}
-
-// EmitUndo can be used to undo (remove) the tokens
-// grabbed by GrabMany. It removes when the current
-// matcher returns false.
-func (m MatcherFunc) EmitUndo(ts *[]Token) MatcherFunc {
-	return func(c *Code) bool {
-		if ini := len(*ts); !m(c) {
-			*ts = (*ts)[0:ini]
-			return false
-		}
-		return true
-	}
-}
-
-// Grab captures the current token and fills s with it.
-func (m MatcherFunc) Grab(s *string) MatcherFunc {
-	return m.On(func(t Token) {
-		*s = t.Text
-	})
-}
-
-// GrabMany captures the current token and adds it to a slice.
-// Note that tokens might repeat depending on the logic.
-func (m MatcherFunc) GrabMany(s *[]string) MatcherFunc {
-	return m.On(func(t Token) {
-		*s = append(*s, t.Text)
-	})
-}
-
-// GrabUndo can be used to undo (remove) the tokens
-// grabbed by GrabMany. It removes when the current
-// matcher returns false.
-func (m MatcherFunc) GrabUndo(ts *[]string) MatcherFunc {
-	return func(c *Code) bool {
-		if ini := len(*ts); !m(c) {
-			*ts = (*ts)[0:ini]
-			return false
-		}
-		return true
-	}
-}
-
-// Grab captures the current token position and fills p with it.
-func (m MatcherFunc) GrabPos(p *int) MatcherFunc {
-	return m.On(func(t Token) {
-		*p = t.Pos
-	})
-}
+import "strconv"
 
 // On calls f with the matched token
-// when the current matcher matches.
+// when the current matcher return true.
 func (m MatcherFunc) On(f func(Token)) MatcherFunc {
 	return func(c *Code) bool {
 		if ini := c.Mark(); m(c) {
@@ -73,5 +12,61 @@ func (m MatcherFunc) On(f func(Token)) MatcherFunc {
 			return true
 		}
 		return false
+	}
+}
+
+// Emit captures the current token.
+func Emit(t *Token) func(Token) {
+	return func(tk Token) {
+		*t = tk
+	}
+}
+
+// Emits captures the current token and adds it to a slice.
+func Emits(ts *[]Token) func(Token) {
+	return func(t Token) {
+		*ts = append(*ts, t)
+	}
+}
+
+// Grab captures the current token.
+func Grab(s *string) func(Token) {
+	return func(t Token) {
+		*s = t.Text
+	}
+}
+
+// Grabs captures the current token and adds it to a slice.
+func Grabs(s *[]string) func(Token) {
+	return func(t Token) {
+		*s = append(*s, t.Text)
+	}
+}
+
+// Index captures the current token position.
+func Index(i *int) func(Token) {
+	return func(t Token) {
+		*i = t.Pos
+	}
+}
+
+// Indexes captures the current token position and adds it to a slice.
+func Indexes(is *[]int) func(Token) {
+	return func(t Token) {
+		*is = append(*is, t.Pos)
+	}
+}
+
+// Int captures the current token and converts it to integer.
+func Int(v *int) func(Token) {
+	return func(t Token) {
+		*v, _ = strconv.Atoi(t.Text)
+	}
+}
+
+// Float captures the current token and converts it to float.
+func Float(v *float64) func(Token) {
+	return func(t Token) {
+		*v, _ = strconv.ParseFloat(t.Text, 64)
 	}
 }

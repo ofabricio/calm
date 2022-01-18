@@ -170,16 +170,20 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Undo](#Undo)
 - [x] [Rewind](#Rewind)
 
+#### Event
+
+- [x] [On](#On)
+
 #### Grabber
 
 - [x] [Grab](#Grab)
-- [x] [GrabMany](#GrabMany)
-- [x] [GrabUndo](#GrabUndo)
-- [x] [GrabPos](#GrabPos)
+- [x] [Grabs](#Grabs)
 - [x] [Emit](#Emit)
-- [x] [EmitMany](#EmitMany)
-- [x] [EmitUndo](#EmitUndo)
-- [x] [On](#On)
+- [x] [Emits](#Emits)
+- [x] [Index](#Index)
+- [x] [Indexes](#Indexes)
+- [x] [Int](#Int)
+- [x] [Float](#Float)
 - [x] [Back Reference](#Back-Reference)
 
 #### Util
@@ -472,45 +476,22 @@ Grab captures the current token string.
 c := New("abc123")
 
 var t string
-c.Run(F(unicode.IsLetter).OneToMany().Grab(&t))
+c.Run(F(unicode.IsLetter).OneToMany().On(Grab(&t)))
 
 fmt.Println(t) // abc
 ```
 
-## GrabMany
+## Grabs
 
-GrabMany captures the current token string and adds it to a slice.
+Grabs captures the current token string and adds it to a slice.
 
 ```go
 c := New("abc123")
 
 var ts []string
-c.Run(F(unicode.IsLetter).GrabMany(&ts).OneToMany())
+c.Run(F(unicode.IsLetter).On(Grabs(&ts)).OneToMany())
 
 fmt.Println(ts) // [a b c]
-```
-
-Note that GrabMany might repeat tokens depending on the logic used.
-
-## GrabUndo
-
-GrabUndo can be used to undo (remove) tokens grabbed by GrabMany.
-It removes when the current matcher returns false.
-This is usually used along with [Rewind](#Rewind),
-since when a match rewinds you might want to discard grabbed tokens.
-See an example [here](grabber_test.go).
-
-## GrabPos
-
-GrabPos captures the current token position.
-
-```go
-c := New("abc")
-
-var pos int
-c.Run(And(S("a"), S("b").GrabPos(&pos), S("c")))
-
-fmt.Println(pos) // 1
 ```
 
 ## Emit
@@ -521,33 +502,75 @@ Emit captures the current token.
 c := New("abc123")
 
 var t Token
-c.Run(F(unicode.IsLetter).OneToMany().Emit(&t))
+c.Run(F(unicode.IsLetter).OneToMany().On(Emit(&t)))
 
 fmt.Println(t) // {abc 0 1 1}
 ```
 
-## EmitMany
+## Emits
 
-EmitMany captures the current token and adds it to a slice.
+Emits captures the current token and adds it to a slice.
 
 ```go
 c := New("abc123")
 
 var ts []Token
-c.Run(F(unicode.IsLetter).EmitMany(&ts).OneToMany())
+c.Run(F(unicode.IsLetter).On(Emits(&ts)).OneToMany())
 
 fmt.Println(ts) // [{a 0 1 1} {b 1 1 2} {c 2 1 3}]
 ```
 
-Note that EmitMany might repeat tokens depending on the logic used.
+## Index
 
-## EmitUndo
+Index captures the current token position.
 
-EmitUndo can be used to undo (remove) tokens emitted by EmitMany.
-It removes when the current matcher returns false.
-This is usually used along with [Rewind](#Rewind),
-since when a match rewinds you might want to discard emitted tokens.
-See an example [here](grabber_test.go).
+```go
+c := New("abc")
+
+var pos int
+c.Run(And(S("a"), S("b").On(Index(&pos)), S("c")))
+
+fmt.Println(pos) // 1
+```
+
+## Indexes
+
+Index captures the current token position and adds it to a slice.
+
+```go
+c := New("abc")
+
+var pos []int
+c.Run(And(S("a"), S("b").On(Indexes(&pos)), S("c").On(Indexes(&pos))))
+
+fmt.Println(pos) // [1 2]
+```
+
+## Int
+
+Int captures the current token and converts it to integer.
+
+```go
+c := New("123")
+
+var v int
+c.Run(Next().OneToMany().On(Int(&v)))
+
+fmt.Println(v) // 123
+```
+
+## Float
+
+Float captures the current token and converts it to float.
+
+```go
+c := New("1.2")
+
+var v float64
+c.Run(Next().OneToMany().On(Float(&v)))
+
+fmt.Println(v) // 1.2
+```
 
 ## On
 
@@ -570,7 +593,7 @@ It is possible to create a back reference with [Grab](#Grab) + [SR](#SR).
 ```go
 var quote string
 
-code := And(Or(S(`"`), S(`'`)).Grab(&quote), F(unicode.IsLetter).OneToMany(), SR(&quote))
+code := And(Or(S(`"`), S(`'`)).On(Grab(&quote)), F(unicode.IsLetter).OneToMany(), SR(&quote))
 
 a := New(`"hello"`).Run(code)
 b := New(`'hello'`).Run(code)
@@ -602,7 +625,7 @@ c := New(`They said "Wow!" and "This is cool!" when they saw this.`)
 
 var quotes []string
 
-strg := String(`"`).GrabMany(&quotes)
+strg := String(`"`).On(Grabs(&quotes))
 code := Or(strg, Next()).OneToMany()
 
 ok := c.Run(code)

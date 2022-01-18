@@ -13,7 +13,7 @@ func main() {
 
 	var words []string
 
-	word := F(unicode.IsLetter).OneToMany().GrabMany(&words)
+	word := F(unicode.IsLetter).OneToMany().On(Grabs(&words))
 	only := Or(word, Next()).OneToMany()
 
 	ok := src.Run(only)

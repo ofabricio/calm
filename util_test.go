@@ -42,7 +42,7 @@ func TestMatcherFunc_String(t *testing.T) {
 		c := New(tc.in)
 
 		var tk string
-		ok := c.Run(tc.mf.Grab(&tk))
+		ok := c.Run(tc.mf.On(Grab(&tk)))
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, tk, tc.in)

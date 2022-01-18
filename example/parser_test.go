@@ -65,7 +65,7 @@ func (t *GoProgram) function() MatcherFunc {
 		t.ws(),
 		S("func "),
 		t.ws(),
-		t.name().Grab(&f.Name),
+		t.name().On(Grab(&f.Name)),
 		t.ws(),
 		S("("),
 		t.ws(),
@@ -81,19 +81,19 @@ func (t *GoProgram) function() MatcherFunc {
 }
 
 func (t *GoProgram) statement(body *[]string) MatcherFunc {
-	return And(t.ws(), Until(Eq("\n"), Eq("}")).GrabMany(body))
+	return And(t.ws(), Until(Eq("\n"), Eq("}")).On(Grabs(body)))
 }
 
 func (t *GoProgram) imports(name *[]string) MatcherFunc {
-	return And(t.ws(), S("import "), String(`"`).GrabMany(name))
+	return And(t.ws(), S("import "), String(`"`).On(Grabs(name)))
 }
 
 func (t *GoProgram) packageName(name *string) MatcherFunc {
-	return And(t.ws(), S("package "), t.name().Grab(name))
+	return And(t.ws(), S("package "), t.name().On(Grab(name)))
 }
 
 func (t *GoProgram) comment() MatcherFunc {
-	return And(t.ws(), And(S("//"), Until(Eq("\n")).True()).GrabMany(&t.Comments)).ZeroToMany()
+	return And(t.ws(), And(S("//"), Until(Eq("\n")).True()).On(Grabs(&t.Comments))).ZeroToMany()
 }
 
 func (t *GoProgram) name() MatcherFunc {
