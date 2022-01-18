@@ -191,7 +191,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Debug](#Debug)
 - [x] [String](#String)
 
-## S
+### S
 
 S tests if the current token matches a string and moves the position if true.
 
@@ -206,7 +206,7 @@ d := m.Run(S("world"))
 fmt.Println(a, b, c, d) // true true false true
 ```
 
-## F
+### F
 
 F tests if the current character matches a rune function and moves the position if true.
 
@@ -220,12 +220,12 @@ c := m.Run(F(unicode.IsLetter)) // 5
 fmt.Println(a, b, c) // true true false
 ```
 
-## SR
+### SR
 
 SR behaves exactly the same as [S](#S) but receives a string reference as argument.
 This allows [Back Reference](#Back-Reference).
 
-## Eq
+### Eq
 
 Eq tests if the current token matches a string. It does not move the cursor.
 
@@ -238,13 +238,13 @@ b := c.Run(Eq("hello"))
 fmt.Println(a, b) // true true
 ```
 
-## More
+### More
 
 More runs the current operator only if there are more characters to match (so the cursor can move).
 
 It is used to prevent overflow in some operations.
 
-## Or
+### Or
 
 Or returns true if one of its arguments return true.
 
@@ -256,7 +256,7 @@ ok := c.Run(Or(S("grape"), S("apple")))
 fmt.Println(ok) // true
 ```
 
-## And
+### And
 
 And returns true if all of its arguments return true.
 
@@ -268,7 +268,7 @@ ok := c.Run(And(S("hello"), S(" "), S("world")))
 fmt.Println(ok) // true
 ```
 
-## Not
+### Not
 
 Not negates the current operator. True becomes false and vice-versa.
 
@@ -282,7 +282,7 @@ fmt.Println(ok) // false
 
 Note that the cursor advances even though it returns false.
 
-## True
+### True
 
 True forces the current operator to return true.
 
@@ -294,7 +294,7 @@ ok := c.Run(S("world").True())
 fmt.Println(ok) // true
 ```
 
-## False
+### False
 
 False forces the current operator to return false.
 
@@ -308,7 +308,7 @@ fmt.Println(ok) // false
 
 Note that the cursor advances even though it returns false.
 
-## ZeroToMany
+### ZeroToMany
 
 ZeroToMany matches zero to many tokens. It is equivalent to the regex symbol `*`.
 
@@ -322,7 +322,7 @@ c := New("hello  world").Run(m)
 fmt.Println(a, b, c) // true true true
 ```
 
-## OneToMany
+### OneToMany
 
 OneToMany matches one to many tokens. It is equivalent to the regex symbol `+`.
 
@@ -336,7 +336,7 @@ c := New("hello  world").Run(m)
 fmt.Println(a, b, c) // false true true
 ```
 
-## ZeroToOne
+### ZeroToOne
 
 ZeroToOne matches an optional token. It is equivalent to the regex symbol `?`.
 
@@ -349,7 +349,7 @@ b := New("colour").Run(m)
 fmt.Println(a, b) // true true
 ```
 
-## Min
+### Min
 
 Min matches a minimum number of tokens.
 
@@ -363,7 +363,7 @@ c := New("aaa").Run(m)
 fmt.Println(a, b, c) // false true true
 ```
 
-## Until
+### Until
 
 Until matches until some matcher return true.
 
@@ -381,7 +381,7 @@ Note that Until advances the position by one character.
 Be careful when using as argument matchers with more
 than one character like `S("abc")`.
 
-## While
+### While
 
 While matches while any matcher returns true.
 
@@ -398,7 +398,7 @@ Note that While advances the position by one character.
 Be careful when using as argument matchers with more
 than one character like `S("abc")`.
 
-## Recursive
+### Recursive
 
 Recursive allows recursive call of a matcher.
 
@@ -423,7 +423,7 @@ but it can be a pain when capturing tokens.
 See [here](example/expression_test.go) an example on how to recursively
 parse an expression without using this operator.
 
-## Next
+### Next
 
 Next moves to the next character when the current matcher returns true.
 
@@ -437,7 +437,7 @@ fmt.Println(ok) // true
 
 There is also a static version of `Next`.
 
-## Undo
+### Undo
 
 Undo sends the cursor back to the
 begining of the current matcher if it
@@ -454,7 +454,7 @@ ok := c.Run(And(
 fmt.Println(ok) // true
 ```
 
-## Rewind
+### Rewind
 
 Rewind sends the cursor back to the
 begining of the current matcher if it
@@ -471,7 +471,7 @@ ok := c.Run(Or(
 fmt.Println(ok) // true
 ```
 
-## Grab
+### Grab
 
 Grab captures the current token string.
 
@@ -484,7 +484,7 @@ c.Run(F(unicode.IsLetter).OneToMany().On(Grab(&t)))
 fmt.Println(t) // abc
 ```
 
-## Grabs
+### Grabs
 
 Grabs captures the current token string and adds it to a slice.
 
@@ -497,7 +497,7 @@ c.Run(F(unicode.IsLetter).On(Grabs(&ts)).OneToMany())
 fmt.Println(ts) // [a b c]
 ```
 
-## Emit
+### Emit
 
 Emit captures the current token.
 
@@ -510,7 +510,7 @@ c.Run(F(unicode.IsLetter).OneToMany().On(Emit(&t)))
 fmt.Println(t) // {abc 0 1 1}
 ```
 
-## Emits
+### Emits
 
 Emits captures the current token and adds it to a slice.
 
@@ -523,7 +523,7 @@ c.Run(F(unicode.IsLetter).On(Emits(&ts)).OneToMany())
 fmt.Println(ts) // [{a 0 1 1} {b 1 1 2} {c 2 1 3}]
 ```
 
-## Index
+### Index
 
 Index captures the current token position.
 
@@ -536,7 +536,7 @@ c.Run(And(S("a"), S("b").On(Index(&pos)), S("c")))
 fmt.Println(pos) // 1
 ```
 
-## Indexes
+### Indexes
 
 Index captures the current token position and adds it to a slice.
 
@@ -549,7 +549,7 @@ c.Run(And(S("a"), S("b").On(Indexes(&pos)), S("c").On(Indexes(&pos))))
 fmt.Println(pos) // [1 2]
 ```
 
-## Int
+### Int
 
 Int captures the current token and converts it to integer.
 
@@ -562,7 +562,7 @@ c.Run(Next().OneToMany().On(Int(&v)))
 fmt.Println(v) // 123
 ```
 
-## Float
+### Float
 
 Float captures the current token and converts it to float.
 
@@ -575,7 +575,7 @@ c.Run(Next().OneToMany().On(Float(&v)))
 fmt.Println(v) // 1.2
 ```
 
-## On
+### On
 
 On calls a function with the current token when the current operator returns true.
 
@@ -589,7 +589,7 @@ f := func(t Token) {
 c.Run(S("hello").On(f))
 ```
 
-## Back Reference
+### Back Reference
 
 It is possible to create a back reference with [Grab](#Grab) + [SR](#SR).
 
@@ -605,7 +605,7 @@ c := New(`"hello'`).Run(code)
 fmt.Println(a, b, c) // true true false
 ```
 
-## Debug
+### Debug
 
 Debug prints debug info to the stdout.
 
@@ -619,7 +619,7 @@ c.Run(F(unicode.IsLetter).Debug().OneToMany())
 // [debug] Match: false Token: ''  Pos: 2 Row: 1 Col: 3
 ```
 
-## String
+### String
 
 String parses a common string definition. It allows quote escaping.
 
