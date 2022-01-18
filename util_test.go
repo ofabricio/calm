@@ -56,5 +56,5 @@ func ExampleMatcherFunc_Debug() {
 	c.Run(S("a").Debug())
 
 	// Output:
-	// [debug] Match: true Token: 'a' Pos: 0 End: 1
+	// [debug] Match: true  Token: 'a' Pos: 0 Row: 1 Col: 1
 }

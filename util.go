@@ -18,7 +18,7 @@ func (m MatcherFunc) Debug() MatcherFunc {
 		okz := m(c)
 		end := c.Mark()
 		tkn := c.Token(ini, end)
-		fmt.Printf("[debug] Match: %v Token: '%s' Pos: %d End: %d\n", okz, tkn.Text, tkn.Pos, end.pos)
+		fmt.Printf("[debug] Match: %-5t Token: %-3s Pos: %d Row: %d Col: %d\n", okz, "'"+tkn.Text+"'", tkn.Pos, tkn.Row, tkn.Col)
 		return okz
 	}
 }

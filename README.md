@@ -614,9 +614,9 @@ c := New("Hi")
 
 c.Run(F(unicode.IsLetter).Debug().OneToMany())
 
-// [debug] Match: true  Token: 'H' Pos: 0 End: 1
-// [debug] Match: true  Token: 'i' Pos: 1 End: 2
-// [debug] Match: false Token: ''  Pos: 2 End: 2
+// [debug] Match: true  Token: 'H' Pos: 0 Row: 1 Col: 1
+// [debug] Match: true  Token: 'i' Pos: 1 Row: 1 Col: 2
+// [debug] Match: false Token: ''  Pos: 2 Row: 1 Col: 3
 ```
 
 ## String
