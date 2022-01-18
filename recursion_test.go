@@ -25,16 +25,15 @@ func TestRecursive(t *testing.T) {
 
 		c := New(tc.in)
 
-		var term Wrap
-		var expr Wrap
+		term, setTerm := Recursive()
+		expr, setExpr := Recursive()
 
 		value := F(unicode.IsNumber)
-		factor := Or(And(S("("), &expr, S(")")), value)
+		factor := Or(And(S("("), expr, S(")")), value)
+		setTerm(Or(And(factor, S("*"), term).Rewind(), factor))
+		setExpr(Or(And(term, S("+"), expr).Rewind(), term))
 
-		Or(And(factor, S("*"), &term).Rewind(), factor).Recursive(&term)
-		Or(And(&term, S("+"), &expr).Rewind(), &term).Recursive(&expr)
-
-		ok := c.Run(And(&expr, F(unicode.IsPrint).Not()))
+		ok := c.Run(And(expr, Next().Not()))
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.in, c.Take(0, c.Here()), tc.in)

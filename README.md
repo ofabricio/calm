@@ -399,26 +399,28 @@ than one character like `S("abc")`.
 
 ## Recursive
 
-Recursive allows recursive calls of the current matcher.
+Recursive allows recursive call of a matcher.
 
 ```go
 c := New("0+1*(2+3)*4")
 
-var term Wrap
-var expr Wrap
+term, setTerm := Recursive()
+expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber)
-factor := Or(And(S("("), &expr, S(")")), value)
-Or(And(factor, S("*"), &term).Rewind(), factor).Recursive(&term)
-Or(And(&term, S("+"), &expr).Rewind(), &term).Recursive(&expr)
+factor := Or(And(S("("), expr, S(")")), value)
+setTerm(Or(And(factor, S("*"), term).Rewind(), factor))
+setExpr(Or(And(term, S("+"), expr).Rewind(), term))
 
-ok := c.Run(&expr)
+ok := c.Run(expr)
 
 fmt.Println(ok) // true
 ```
 
-See [here](example/expression_test.go) another example on how to recursively
-parse an expression without using this recursive operator.
+This operator is handy for small validations,
+but it can be a pain when capturing tokens.
+See [here](example/expression_test.go) an example on how to recursively
+parse an expression without using this operator.
 
 ## Next
 
