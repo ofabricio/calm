@@ -576,7 +576,7 @@ fmt.Println(v) // 1.2
 
 ## On
 
-On calls a function with the token when the current operator matches.
+On calls a function with the current token when the current operator returns true.
 
 ```go
 c := New("hello")

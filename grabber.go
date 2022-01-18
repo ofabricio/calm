@@ -2,8 +2,8 @@ package calm
 
 import "strconv"
 
-// On calls f with the matched token
-// when the current matcher return true.
+// On calls f with the current token
+// when the current matcher returns true.
 func (m MatcherFunc) On(f func(Token)) MatcherFunc {
 	return func(c *Code) bool {
 		if ini := c.Mark(); m(c) {
