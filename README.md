@@ -378,10 +378,6 @@ c := m.Run(New("abcd."))
 fmt.Println(a, b, c) // false true true
 ```
 
-Note that Until advances the position by one character.
-Be careful when using as argument matchers with more
-than one character like `S("abc")`.
-
 ### While
 
 While matches while any matcher returns true.
@@ -394,10 +390,6 @@ b := m.Run(New("hello"))
 
 fmt.Println(a, b) // true false
 ```
-
-Note that While advances the position by one character.
-Be careful when using as argument matchers with more
-than one character like `S("abc")`.
 
 ### Recursive
 
@@ -634,8 +626,7 @@ root := Or(strg, Next()).OneToMany()
 
 ok := root.Run(c)
 
-fmt.Println(ok, quotes)
-// true ["Wow!" "This is cool!"]
+fmt.Println(ok, quotes) // true ["Wow!" "This is cool!"]
 ```
 
 ### Json
@@ -652,6 +643,5 @@ root := Or(jsns, Next()).OneToMany()
 
 ok := root.Run(c)
 
-fmt.Println(ok, jsons)
-// true [{ "hello": "world" } { "foo": "bar" }]
+fmt.Println(ok, jsons) // true [{ "hello": "world" } { "foo": "bar" }]
 ```

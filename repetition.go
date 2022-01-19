@@ -30,17 +30,11 @@ func (t MatcherFunc) Min(n int) MatcherFunc {
 }
 
 // Until matches until some matcher return true.
-// Note that it only advances the position by one character,
-// so be careful when using matchers with more than one
-// character like S("abc").
 func Until(or ...Matcher) MatcherFunc {
 	return Or(or...).Not().Next().OneToMany()
 }
 
 // While matches while any matcher returns true.
-// Note that it only advances the position by one character,
-// so be careful when using matchers with more than one
-// character like S("abc").
 func While(or ...Matcher) MatcherFunc {
 	return Or(or...).Next().OneToMany()
 }
