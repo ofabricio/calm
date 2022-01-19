@@ -168,7 +168,6 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 - [x] [Next](#Next)
 - [x] [Undo](#Undo)
-- [x] [Rewind](#Rewind)
 
 #### Event
 
@@ -403,8 +402,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*"), term).Rewind(), factor))
-setExpr(Or(And(term, S("+"), expr).Rewind(), term))
+setTerm(Or(And(factor, S("*"), term).Undo(), factor))
+setExpr(Or(And(term, S("+"), expr).Undo(), term))
 
 ok := expr.Run(code)
 
@@ -433,32 +432,15 @@ There is also a static version of `Next`.
 ### Undo
 
 Undo sends the cursor back to the
-begining of the current matcher if it
-returns true.
-
-```go
-c := New("hello world")
-
-ok := And(
-    S("hello").Undo(),
-    S("hello world"),
-).Run(c)
-
-fmt.Println(ok) // true
-```
-
-### Rewind
-
-Rewind sends the cursor back to the
-begining of the current matcher if it
+beginning of the current matcher if it
 returns false.
 
 ```go
-c := New("hello world")
+c := New("1+2")
 
 ok := Or(
-    And(S("hello"), S("world")).Rewind(),
-    S("hello world"),
+    And(S("1"), S("*"), S("2")).Undo(),
+    And(S("1"), S("+"), S("2")),
 ).Run(c)
 
 fmt.Println(ok) // true

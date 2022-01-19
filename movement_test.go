@@ -36,15 +36,14 @@ func TestNext(t *testing.T) {
 	}
 }
 
-func TestRewind_and_Undo(t *testing.T) {
+func TestUndo(t *testing.T) {
 
 	tt := []struct {
 		in string
 		ok bool
 		mf MatcherFunc
 	}{
-		{"a", true, S("a").Not().Rewind().Not()},
-		{"a", true, S("a").Undo()},
+		{"a", true, S("a").Not().Undo().Not()},
 	}
 
 	for _, tc := range tt {

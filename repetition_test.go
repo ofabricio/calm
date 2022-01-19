@@ -42,7 +42,7 @@ func TestRepetition(t *testing.T) {
 		{"a", true, S("a").Min(1), "a"},
 		{"aa", true, S("a").Min(1), "aa"},
 		{"", false, S("a").Min(2), ""},
-		{"a", false, S("a").Min(2), "a"}, // This should fail if we put Rewind in Min.
+		{"a", false, S("a").Min(2), "a"}, // This should fail if we put Undo in Min.
 		{"aa", true, S("a").Min(2), "aa"},
 		{"aaa", true, S("a").Min(2), "aaa"},
 		// Until

@@ -14,22 +14,15 @@ func (m MatcherFunc) Next() MatcherFunc {
 	return And(m, Next())
 }
 
-// Rewind sends the cursor back to the
-// begining of the current matcher if
-// it returns false.
-func (m MatcherFunc) Rewind() MatcherFunc {
-	return m.Not().Undo().Not()
-}
-
 // Undo sends the cursor back to the
-// begining of the current matcher
-// if it returns true.
+// beginning of the current matcher
+// if it returns false.
 func (m MatcherFunc) Undo() MatcherFunc {
 	return func(c *Code) bool {
-		if ini := c.Mark(); m(c) {
+		if ini := c.Mark(); !m(c) {
 			c.Back(ini)
-			return true
+			return false
 		}
-		return false
+		return true
 	}
 }
