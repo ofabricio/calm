@@ -11,13 +11,11 @@ import (
 
 func ExampleExpression() {
 
-	src := "6+5*(4+3)*2"
-
-	c := New(src)
+	src := New("6+5*(4+3)*2")
 
 	exp := &Expression{}
 
-	ok := c.Run(expr(exp))
+	ok := expr(exp).Run(src)
 
 	exp.print(0)
 	fmt.Println("Result:", exp.result())

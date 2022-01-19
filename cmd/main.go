@@ -9,14 +9,14 @@ import (
 
 func main() {
 
-	src := New("Hello, World!")
+	code := New("Hello, World!")
 
 	var words []string
 
 	word := F(unicode.IsLetter).OneToMany().On(Grabs(&words))
-	only := Or(word, Next()).OneToMany()
+	root := Or(word, Next()).OneToMany()
 
-	ok := src.Run(only)
+	ok := root.Run(code)
 
 	fmt.Println(ok, words)
 	// true [Hello World]

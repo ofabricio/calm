@@ -22,7 +22,7 @@ func TestSR(t *testing.T) {
 		c := New(tc.in)
 
 		a := "a"
-		ok := c.Run(SR(&a))
+		ok := SR(&a).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
@@ -47,7 +47,7 @@ func TestS_F(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(tc.mf)
+		ok := tc.mf.Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
@@ -73,7 +73,7 @@ func TestEq(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(tc.mf)
+		ok := tc.mf.Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

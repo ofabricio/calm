@@ -42,7 +42,7 @@ func TestMatcherFunc_String(t *testing.T) {
 		c := New(tc.in)
 
 		var tk string
-		ok := c.Run(tc.mf.On(Grab(&tk)))
+		ok := tc.mf.On(Grab(&tk)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, tk, tc.in)
@@ -53,7 +53,7 @@ func ExampleMatcherFunc_Debug() {
 
 	c := New("a")
 
-	c.Run(S("a").Debug())
+	S("a").Debug().Run(c)
 
 	// Output:
 	// [debug] Match: true  Token: 'a' Pos: 0 Row: 1 Col: 1
@@ -103,7 +103,7 @@ func TestJson(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(Json())
+		ok := Json().Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

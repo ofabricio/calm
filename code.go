@@ -9,11 +9,6 @@ func New(src string) *Code {
 	return &Code{src: src, row: 1, col: 1}
 }
 
-// Run implements the Matcher interface.
-func (c *Code) Run(m Matcher) bool {
-	return m.Run(c)
-}
-
 // Equal tests if the string matches
 // with the current position.
 // It does not advances the position.

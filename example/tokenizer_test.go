@@ -9,14 +9,14 @@ import (
 
 func Example() {
 
-	src := `
+	code := New(`
 	package main
 
 	import "fmt"
 
 	func main() {
 		fmt.Println("Hello, 世界")
-	}`
+	}`)
 
 	print := func(t Token) {
 		fmt.Printf("Pos: %-3d Line: %-2d Column: %-3d Token: %s\n", t.Pos, t.Row, t.Col, t.Text)
@@ -27,9 +27,9 @@ func Example() {
 	word := F(unicode.IsLetter).OneToMany().On(print)
 	rest := Next().On(print)
 
-	code := Or(spac, strg, word, rest).ZeroToMany()
+	root := Or(spac, strg, word, rest).ZeroToMany()
 
-	ok := New(src).Run(code)
+	ok := root.Run(code)
 
 	fmt.Println(ok)
 

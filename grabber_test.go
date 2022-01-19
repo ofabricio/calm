@@ -29,7 +29,7 @@ func TestOn(t *testing.T) {
 			tk = tkn
 		}
 
-		ok := c.Run(And(S("a"), S("b").On(on), S("c")))
+		ok := And(S("a"), S("b").On(on), S("c")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.expToken, tk.Text, tc.in)
@@ -42,8 +42,8 @@ func TestEmit(t *testing.T) {
 	c := New("ab\ncdef\ngh")
 
 	var tk1, tk2 Token
-	ok1 := c.Run(S("ab\ncd").On(Emit(&tk1)))
-	ok2 := c.Run(S("ef\ngh").On(Emit(&tk2)))
+	ok1 := S("ab\ncd").On(Emit(&tk1)).Run(c)
+	ok2 := S("ef\ngh").On(Emit(&tk2)).Run(c)
 
 	assert.True(t, ok1)
 	assert.Equal(t, Token{Text: "ab\ncd", Pos: 0, Row: 1, Col: 1}, tk1)
@@ -69,7 +69,7 @@ func TestEmits(t *testing.T) {
 	c := New("ab\ncdef\ngh")
 
 	var tks []Token
-	ok := c.Run(Or(F(unicode.IsLetter), S("\n")).On(Emits(&tks)).OneToMany())
+	ok := Or(F(unicode.IsLetter), S("\n")).On(Emits(&tks)).OneToMany().Run(c)
 
 	assert.True(t, ok)
 	assert.Equal(t, exp, tks)
@@ -91,7 +91,7 @@ func TestGrab(t *testing.T) {
 		c := New(tc.in)
 
 		var token string
-		ok := c.Run(And(S("a"), S("b").On(Grab(&token)), S("c")))
+		ok := And(S("a"), S("b").On(Grab(&token)), S("c")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, token, tc.in)
@@ -115,7 +115,7 @@ func TestGrabs(t *testing.T) {
 
 		var tokens []string
 
-		ok := c.Run(F(unicode.IsLetter).On(Grabs(&tokens)).OneToMany())
+		ok := F(unicode.IsLetter).On(Grabs(&tokens)).OneToMany().Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, tokens, tc.in)
@@ -138,7 +138,7 @@ func TestIndex(t *testing.T) {
 		c := New(tc.in)
 
 		var idx int
-		ok := c.Run(And(S("a"), S("b").On(Index(&idx)), S("c")))
+		ok := And(S("a"), S("b").On(Index(&idx)), S("c")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.expIdx, idx, tc.in)
@@ -162,7 +162,7 @@ func TestIndexes(t *testing.T) {
 
 		var idx []int
 
-		ok := c.Run(F(unicode.IsLetter).On(Indexes(&idx)).OneToMany())
+		ok := F(unicode.IsLetter).On(Indexes(&idx)).OneToMany().Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, idx, tc.in)
@@ -186,7 +186,7 @@ func TestInt(t *testing.T) {
 		c := New(tc.in)
 
 		var v int
-		ok := c.Run(Next().OneToMany().On(Int(&v)))
+		ok := Next().OneToMany().On(Int(&v)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, v, tc.in)
@@ -212,7 +212,7 @@ func TestFloat(t *testing.T) {
 		c := New(tc.in)
 
 		var v float64
-		ok := c.Run(Next().OneToMany().On(Float(&v)))
+		ok := Next().OneToMany().On(Float(&v)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, v, tc.in)
@@ -235,7 +235,7 @@ func TestBackReference_With_Grab_And_SR(t *testing.T) {
 		c := New(tc.in)
 
 		var quote string
-		ok := c.Run(And(Or(S("\""), S("'")).On(Grab(&quote)), S("a"), SR(&quote)))
+		ok := And(Or(S("\""), S("'")).On(Grab(&quote)), S("a"), SR(&quote)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

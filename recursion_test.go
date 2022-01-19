@@ -33,7 +33,7 @@ func TestRecursive(t *testing.T) {
 		setTerm(Or(And(factor, S("*"), term).Rewind(), factor))
 		setExpr(Or(And(term, S("+"), expr).Rewind(), term))
 
-		ok := c.Run(And(expr, Next().Not()))
+		ok := And(expr, Next().Not()).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

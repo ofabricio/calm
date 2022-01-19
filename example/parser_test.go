@@ -9,7 +9,7 @@ import (
 
 func ExampleGoProgram() {
 
-	src := `
+	src := New(`
 	// You can edit this code!
 	// Click here and start typing.
 	package main
@@ -18,13 +18,11 @@ func ExampleGoProgram() {
 
 	func main() {
 		fmt.Println("Hello, 世界")
-	}`
-
-	c := New(src)
+	}`)
 
 	p := &GoProgram{}
 
-	ok := c.Run(p.program())
+	ok := p.program().Run(src)
 
 	fmt.Println("Package:", p.Package)
 	fmt.Println("Imports:", p.Imports)

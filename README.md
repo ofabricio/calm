@@ -27,14 +27,14 @@ import (
 
 func main() {
 
-    src := `
+    code := New(`
     package main
 
     import "fmt"
 
     func main() {
         fmt.Println("Hello, 世界")
-    }`
+    }`)
 
     print := func(t Token) {
         fmt.Printf("Pos: %-3d Line: %-2d Column: %-3d Token: %s\n", t.Pos, t.Row, t.Col, t.Text)
@@ -45,9 +45,9 @@ func main() {
     word := F(unicode.IsLetter).OneToMany().On(print)
     rest := Next().On(print)
 
-    code := Or(spac, strg, word, rest).ZeroToMany()
+    root := Or(spac, strg, word, rest).ZeroToMany()
 
-    ok := New(src).Run(code)
+    ok := root.Run(code)
 
     fmt.Println(ok)
 
@@ -199,10 +199,10 @@ S tests if the current token matches a string and moves the position if true.
 ```go
 m := New("hello world")
 
-a := m.Run(S("hello"))
-b := m.Run(S(" "))
-c := m.Run(S("hello"))
-d := m.Run(S("world"))
+a := S("hello").Run(m)
+b := S(" ").Run(m)
+c := S("hello").Run(m)
+d := S("world").Run(m)
 
 fmt.Println(a, b, c, d) // true true false true
 ```
@@ -214,9 +214,9 @@ F tests if the current character matches a rune function and moves the position 
 ```go
 m := New("hi5")
 
-a := m.Run(F(unicode.IsLetter)) // h
-b := m.Run(F(unicode.IsLetter)) // i
-c := m.Run(F(unicode.IsLetter)) // 5
+a := F(unicode.IsLetter).Run(m) // h
+b := F(unicode.IsLetter).Run(m) // i
+c := F(unicode.IsLetter).Run(m) // 5
 
 fmt.Println(a, b, c) // true true false
 ```
@@ -233,8 +233,8 @@ Eq tests if the current token matches a string. It does not move the cursor.
 ```go
 c := New("hello")
 
-a := c.Run(Eq("hello"))
-b := c.Run(Eq("hello"))
+a := Eq("hello").Run(c)
+b := Eq("hello").Run(c)
 
 fmt.Println(a, b) // true true
 ```
@@ -252,7 +252,7 @@ Or returns true if one of its arguments return true.
 ```go
 c := New("apple")
 
-ok := c.Run(Or(S("grape"), S("apple")))
+ok := Or(S("grape"), S("apple")).Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -264,7 +264,7 @@ And returns true if all of its arguments return true.
 ```go
 c := New("hello world")
 
-ok := c.Run(And(S("hello"), S(" "), S("world")))
+ok := And(S("hello"), S(" "), S("world")).Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -276,7 +276,7 @@ Not negates the current operator. True becomes false and vice-versa.
 ```go
 c := New("hello")
 
-ok := c.Run(S("hello").Not())
+ok := S("hello").Not().Run(c)
 
 fmt.Println(ok) // false
 ```
@@ -290,7 +290,7 @@ True forces the current operator to return true.
 ```go
 c := New("hello")
 
-ok := c.Run(S("world").True())
+ok := S("world").True().Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -302,7 +302,7 @@ False forces the current operator to return false.
 ```go
 c := New("hello")
 
-ok := c.Run(S("hello").False())
+ok := S("hello").False().Run(c)
 
 fmt.Println(ok) // false
 ```
@@ -316,9 +316,9 @@ ZeroToMany matches zero to many tokens. It is equivalent to the regex symbol `*`
 ```go
 m := And(S("hello"), S(" ").ZeroToMany(), S("world"))
 
-a := New("helloworld").Run(m)
-b := New("hello world").Run(m)
-c := New("hello  world").Run(m)
+a := m.Run(New("helloworld"))
+b := m.Run(New("hello world"))
+c := m.Run(New("hello  world"))
 
 fmt.Println(a, b, c) // true true true
 ```
@@ -330,9 +330,9 @@ OneToMany matches one to many tokens. It is equivalent to the regex symbol `+`.
 ```go
 m := And(S("hello"), S(" ").OneToMany(), S("world"))
 
-a := New("helloworld").Run(m)
-b := New("hello world").Run(m)
-c := New("hello  world").Run(m)
+a := m.Run(New("helloworld"))
+b := m.Run(New("hello world"))
+c := m.Run(New("hello  world"))
 
 fmt.Println(a, b, c) // false true true
 ```
@@ -344,8 +344,8 @@ ZeroToOne matches an optional token. It is equivalent to the regex symbol `?`.
 ```go
 m := And(S("colo"), S("u").ZeroToOne(), S("r"))
 
-a := New("color").Run(m)
-b := New("colour").Run(m)
+a := m.Run(New("color"))
+b := m.Run(New("colour"))
 
 fmt.Println(a, b) // true true
 ```
@@ -357,9 +357,9 @@ Min matches a minimum number of tokens.
 ```go
 m := S("a").Min(2)
 
-a := New("a").Run(m)
-b := New("aa").Run(m)
-c := New("aaa").Run(m)
+a := m.Run(New("a"))
+b := m.Run(New("aa"))
+c := m.Run(New("aaa"))
 
 fmt.Println(a, b, c) // false true true
 ```
@@ -371,9 +371,9 @@ Until matches until some matcher return true.
 ```go
 m := Until(Eq(","), Eq("."))
 
-a := New(",").Run(m)
-b := New("ab,").Run(m)
-c := New("abcd.").Run(m)
+a := m.Run(New(","))
+b := m.Run(New("ab,"))
+c := m.Run(New("abcd."))
 
 fmt.Println(a, b, c) // false true true
 ```
@@ -389,8 +389,8 @@ While matches while any matcher returns true.
 ```go
 m := While(Eq("0"), Eq("1"))
 
-a := New("01100").Run(m)
-b := New("hello").Run(m)
+a := m.Run(New("01100"))
+b := m.Run(New("hello"))
 
 fmt.Println(a, b) // true false
 ```
@@ -404,7 +404,7 @@ than one character like `S("abc")`.
 Recursive allows recursive call of a matcher.
 
 ```go
-c := New("0+1*(2+3)*4")
+code := New("0+1*(2+3)*4")
 
 term, setTerm := Recursive()
 expr, setExpr := Recursive()
@@ -414,7 +414,7 @@ factor := Or(And(S("("), expr, S(")")), value)
 setTerm(Or(And(factor, S("*"), term).Rewind(), factor))
 setExpr(Or(And(term, S("+"), expr).Rewind(), term))
 
-ok := c.Run(expr)
+ok := expr.Run(code)
 
 fmt.Println(ok) // true
 ```
@@ -431,7 +431,7 @@ Next moves to the next character when the current matcher returns true.
 ```go
 c := New("hello world")
 
-ok := c.Run(And(S("hello").Next(), S("world")))
+ok := And(S("hello").Next(), S("world")).Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -447,10 +447,10 @@ returns true.
 ```go
 c := New("hello world")
 
-ok := c.Run(And(
+ok := And(
     S("hello").Undo(),
     S("hello world"),
-))
+).Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -464,10 +464,10 @@ returns false.
 ```go
 c := New("hello world")
 
-ok := c.Run(Or(
+ok := Or(
     And(S("hello"), S("world")).Rewind(),
     S("hello world"),
-))
+).Run(c)
 
 fmt.Println(ok) // true
 ```
@@ -480,7 +480,7 @@ Grab captures the current token string.
 c := New("abc123")
 
 var t string
-c.Run(F(unicode.IsLetter).OneToMany().On(Grab(&t)))
+F(unicode.IsLetter).OneToMany().On(Grab(&t)).Run(c)
 
 fmt.Println(t) // abc
 ```
@@ -493,7 +493,7 @@ Grabs captures the current token string and adds it to a slice.
 c := New("abc123")
 
 var ts []string
-c.Run(F(unicode.IsLetter).On(Grabs(&ts)).OneToMany())
+F(unicode.IsLetter).On(Grabs(&ts)).OneToMany().Run(c)
 
 fmt.Println(ts) // [a b c]
 ```
@@ -506,7 +506,7 @@ Emit captures the current token.
 c := New("abc123")
 
 var t Token
-c.Run(F(unicode.IsLetter).OneToMany().On(Emit(&t)))
+F(unicode.IsLetter).OneToMany().On(Emit(&t)).Run(c)
 
 fmt.Println(t) // {abc 0 1 1}
 ```
@@ -519,7 +519,7 @@ Emits captures the current token and adds it to a slice.
 c := New("abc123")
 
 var ts []Token
-c.Run(F(unicode.IsLetter).On(Emits(&ts)).OneToMany())
+F(unicode.IsLetter).On(Emits(&ts)).OneToMany().Run(c)
 
 fmt.Println(ts) // [{a 0 1 1} {b 1 1 2} {c 2 1 3}]
 ```
@@ -532,7 +532,7 @@ Index captures the current token position.
 c := New("abc")
 
 var pos int
-c.Run(And(S("a"), S("b").On(Index(&pos)), S("c")))
+And(S("a"), S("b").On(Index(&pos)), S("c")).Run(c)
 
 fmt.Println(pos) // 1
 ```
@@ -545,7 +545,7 @@ Index captures the current token position and adds it to a slice.
 c := New("abc")
 
 var pos []int
-c.Run(And(S("a"), S("b").On(Indexes(&pos)), S("c").On(Indexes(&pos))))
+And(S("a"), S("b").On(Indexes(&pos)), S("c").On(Indexes(&pos))).Run(c)
 
 fmt.Println(pos) // [1 2]
 ```
@@ -558,7 +558,7 @@ Int captures the current token and converts it to integer.
 c := New("123")
 
 var v int
-c.Run(Next().OneToMany().On(Int(&v)))
+Next().OneToMany().On(Int(&v)).Run(c)
 
 fmt.Println(v) // 123
 ```
@@ -571,7 +571,7 @@ Float captures the current token and converts it to float.
 c := New("1.2")
 
 var v float64
-c.Run(Next().OneToMany().On(Float(&v)))
+Next().OneToMany().On(Float(&v)).Run(c)
 
 fmt.Println(v) // 1.2
 ```
@@ -587,7 +587,7 @@ f := func(t Token) {
     fmt.Println(t) // {hello 0 1 1}
 }
 
-c.Run(S("hello").On(f))
+S("hello").On(f).Run(c)
 ```
 
 ### Back Reference
@@ -597,11 +597,11 @@ It is possible to create a back reference with [Grab](#Grab) + [SR](#SR).
 ```go
 var quote string
 
-code := And(Or(S(`"`), S(`'`)).On(Grab(&quote)), F(unicode.IsLetter).OneToMany(), SR(&quote))
+m := And(Or(S(`"`), S(`'`)).On(Grab(&quote)), F(unicode.IsLetter).OneToMany(), SR(&quote))
 
-a := New(`"hello"`).Run(code)
-b := New(`'hello'`).Run(code)
-c := New(`"hello'`).Run(code)
+a := m.Run(New(`"hello"`))
+b := m.Run(New(`'hello'`))
+c := m.Run(New(`"hello'`))
 
 fmt.Println(a, b, c) // true true false
 ```
@@ -613,7 +613,7 @@ Debug prints debug info to the stdout.
 ```go
 c := New("Hi")
 
-c.Run(F(unicode.IsLetter).Debug().OneToMany())
+F(unicode.IsLetter).Debug().OneToMany().Run(c)
 
 // [debug] Match: true  Token: 'H' Pos: 0 Row: 1 Col: 1
 // [debug] Match: true  Token: 'i' Pos: 1 Row: 1 Col: 2
@@ -630,9 +630,9 @@ c := New(`They said "Wow!" and "This is cool!" when they saw this.`)
 var quotes []string
 
 strg := String(`"`).On(Grabs(&quotes))
-code := Or(strg, Next()).OneToMany()
+root := Or(strg, Next()).OneToMany()
 
-ok := c.Run(code)
+ok := root.Run(c)
 
 fmt.Println(ok, quotes)
 // true ["Wow!" "This is cool!"]
@@ -648,9 +648,9 @@ c := New(`Use either { "hello": "world" } or { "foo": "bar" }.`)
 var jsons []string
 
 jsns := Json().On(Grabs(&jsons))
-code := Or(jsns, Next()).OneToMany()
+root := Or(jsns, Next()).OneToMany()
 
-ok := c.Run(code)
+ok := root.Run(c)
 
 fmt.Println(ok, jsons)
 // true [{ "hello": "world" } { "foo": "bar" }]

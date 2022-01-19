@@ -29,7 +29,7 @@ func TestNext(t *testing.T) {
 		c := New(tc.in)
 		a := c.Mark()
 
-		ok := c.Run(tc.mf)
+		ok := tc.mf.Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, c.Token(a, c.Mark()).Text, tc.in)
@@ -51,7 +51,7 @@ func TestRewind_and_Undo(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(And(tc.mf, S("a")))
+		ok := And(tc.mf, S("a")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

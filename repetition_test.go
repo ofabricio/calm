@@ -64,7 +64,7 @@ func TestRepetition(t *testing.T) {
 		c := New(tc.in)
 		a := c.Mark()
 
-		ok := c.Run(tc.mf)
+		ok := tc.mf.Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, c.Token(a, c.Mark()).Text, tc.in)
@@ -117,8 +117,8 @@ func Test_End_Of_Source_Code(t *testing.T) {
 	for _, tc := range tt {
 		c := New(tc.in)
 
-		a := c.Run(tc.mf)
-		b := c.Run(tc.mf)
+		a := tc.mf.Run(c)
+		b := tc.mf.Run(c)
 
 		assert.Equal(t, tc.a, a, tc.in)
 		assert.Equal(t, tc.b, b, tc.in)

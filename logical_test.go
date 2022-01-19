@@ -21,7 +21,7 @@ func TestOr(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(Or(S("0"), S("1")))
+		ok := Or(S("0"), S("1")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
@@ -43,7 +43,7 @@ func TestAnd(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(And(S("0"), S("1")))
+		ok := And(S("0"), S("1")).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
@@ -68,7 +68,7 @@ func TestTrueFalseNot(t *testing.T) {
 
 		c := New(tc.in)
 
-		ok := c.Run(tc.mf)
+		ok := tc.mf.Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
