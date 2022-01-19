@@ -190,6 +190,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 - [x] [Debug](#Debug)
 - [x] [String](#String)
+- [x] [Json](#Json)
 
 ### S
 
@@ -635,4 +636,22 @@ ok := c.Run(code)
 
 fmt.Println(ok, quotes)
 // true ["Wow!" "This is cool!"]
+```
+
+### Json
+
+Json matches a json.
+
+```go
+c := New(`Use either { "hello": "world" } or { "foo": "bar" }.`)
+
+var jsons []string
+
+jsns := Json().On(Grabs(&jsons))
+code := Or(jsns, Next()).OneToMany()
+
+ok := c.Run(code)
+
+fmt.Println(ok, jsons)
+// true [{ "hello": "world" } { "foo": "bar" }]
 ```

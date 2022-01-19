@@ -1,6 +1,9 @@
 package calm
 
-import "fmt"
+import (
+	"fmt"
+	"unicode"
+)
 
 // String matches a string text given a quote.
 func String(quote string) MatcherFunc {
@@ -21,4 +24,25 @@ func (m MatcherFunc) Debug() MatcherFunc {
 		fmt.Printf("[debug] Match: %-5t Token: %-3s Pos: %d Row: %d Col: %d\n", okz, "'"+tkn.Text+"'", tkn.Pos, tkn.Row, tkn.Col)
 		return okz
 	}
+}
+
+// Json matches a Json.
+func Json() MatcherFunc {
+	// BNF from https://www.json.org
+	ws := F(unicode.IsSpace).ZeroToMany()
+	sign := Or(S("+"), S("-")).ZeroToOne()
+	digits := F(unicode.IsNumber).OneToMany()
+	exponent := And(Or(S("E"), S("e")), sign, digits).ZeroToOne()
+	fraction := And(S("."), digits).ZeroToOne()
+	integer := And(S("-").ZeroToOne(), digits)
+	number := And(integer, fraction, exponent)
+	value := MatcherFunc(func(c *Code) bool {
+		return And(ws, Or(S("true"), S("false"), S("null"), number, String("\""), Json()), ws).Run(c)
+	})
+	objField := And(ws, String("\""), ws, S(":"), value)
+	emptyObj := And(S("{"), ws, S("}")).Rewind()
+	emptyArr := And(S("["), ws, S("]")).Rewind()
+	obj := And(S("{"), objField, And(S(","), objField).ZeroToMany(), S("}"))
+	arr := And(S("["), value, And(S(","), value).ZeroToMany(), S("]"))
+	return Or(emptyObj, obj, emptyArr, arr)
 }
