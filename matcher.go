@@ -42,3 +42,14 @@ func (m MatcherFunc) More() MatcherFunc {
 		return false
 	}
 }
+
+// Run implements the Matcher interface.
+func (m MatcherFunc) Run(c *Code) bool {
+	return m(c)
+}
+
+type MatcherFunc func(*Code) bool
+
+type Matcher interface {
+	Run(*Code) bool
+}

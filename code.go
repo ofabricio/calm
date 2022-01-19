@@ -6,7 +6,7 @@ import (
 )
 
 func New(src string) *Code {
-	return &Code{core: core{src: src}, rowcol: rowcol{1, 1}}
+	return &Code{src: src, row: 1, col: 1}
 }
 
 // Run implements the Matcher interface.
@@ -60,13 +60,24 @@ func (c *Code) Back(m Mark) {
 
 // Token returns the token between ini and end.
 func (c *Code) Token(ini, end Mark) Token {
-	return Token{Text: c.Take(ini.pos, end.pos), Pos: ini.pos, Row: ini.row, Col: ini.col}
+	return Token{Text: c.src[ini.pos:end.pos], Pos: ini.pos, Row: ini.row, Col: ini.col}
 }
 
 // Next moves the position to the next character.
 func (c *Code) Next() {
 	r, _ := c.decodeRune()
 	c.advanceC(r)
+}
+
+// Tail returns the content from the
+// current position to the end.
+func (c *Code) Tail() string {
+	return c.src[c.pos:]
+}
+
+// More tells if there are more characters to scan.
+func (c *Code) More() bool {
+	return c.pos < len(c.src)
 }
 
 func (c *Code) advance(s string) {
@@ -76,18 +87,42 @@ func (c *Code) advance(s string) {
 }
 
 func (c *Code) advanceC(r rune) {
-	c.incCol()
-	if r == '\n' {
-		c.incRow()
+	if c.pos < len(c.src) {
+		c.rowcol(r)
+		c.pos += utf8.RuneLen(r)
 	}
-	c.move(c.Here() + utf8.RuneLen(r))
 }
 
 func (c *Code) decodeRune() (rune, int) {
 	return utf8.DecodeRuneInString(c.Tail())
 }
 
+func (c *Code) rowcol(r rune) {
+	c.col++
+	if r == '\n' {
+		c.row++
+		c.col = 1
+	}
+}
+
 type Code struct {
-	core
-	rowcol
+	src string // Source code.
+	pos int    // Position/Index/Offset/Cursor.
+	row int    // Current line.
+	col int    // Current column.
+}
+
+// Mark represents a mark in the code.
+type Mark struct {
+	pos int
+	row int
+	col int
+}
+
+// Token represents a token of the code.
+type Token struct {
+	Text string
+	Pos  int
+	Row  int
+	Col  int
 }

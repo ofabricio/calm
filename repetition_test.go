@@ -62,11 +62,12 @@ func TestRepetition(t *testing.T) {
 	for _, tc := range tt {
 
 		c := New(tc.in)
+		a := c.Mark()
 
 		ok := c.Run(tc.mf)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
-		assert.Equal(t, tc.ex, c.Take(0, c.Here()), tc.in)
+		assert.Equal(t, tc.ex, c.Token(a, c.Mark()).Text, tc.in)
 	}
 }
 

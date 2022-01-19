@@ -21,16 +21,18 @@ func TestNext(t *testing.T) {
 		{"de", true, Next(), "d"},
 		{"de", true, And(Next(), Next()), "de"},
 		{"de", true, Next().Next(), "de"},
+		{"de", false, Next().Next().Next(), "de"},
 	}
 
 	for _, tc := range tt {
 
 		c := New(tc.in)
+		a := c.Mark()
 
 		ok := c.Run(tc.mf)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
-		assert.Equal(t, tc.ex, c.Take(0, c.Here()), tc.in)
+		assert.Equal(t, tc.ex, c.Token(a, c.Mark()).Text, tc.in)
 	}
 }
 
@@ -42,19 +44,15 @@ func TestRewind_and_Undo(t *testing.T) {
 		mf MatcherFunc
 	}{
 		{"a", true, S("a").Not().Rewind().Not()},
-		{"bb", false, And(S("b"), S("a")).Rewind()},
-		//
 		{"a", true, S("a").Undo()},
-		{"bb", false, And(S("b"), S("a")).Not().Undo().Not()},
 	}
 
 	for _, tc := range tt {
 
 		c := New(tc.in)
 
-		ok := c.Run(tc.mf)
+		ok := c.Run(And(tc.mf, S("a")))
 
 		assert.Equal(t, tc.ok, ok, tc.in)
-		assert.Equal(t, 0, c.Here(), tc.in)
 	}
 }

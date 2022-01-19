@@ -36,6 +36,5 @@ func TestRecursive(t *testing.T) {
 		ok := c.Run(And(expr, Next().Not()))
 
 		assert.Equal(t, tc.ok, ok, tc.in)
-		assert.Equal(t, tc.in, c.Take(0, c.Here()), tc.in)
 	}
 }

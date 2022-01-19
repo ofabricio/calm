@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCodeEqual(t *testing.T) {
+func TestEqual(t *testing.T) {
 
 	c := New("abc")
 
@@ -19,7 +19,7 @@ func TestCodeEqual(t *testing.T) {
 	assert.False(t, c.Equal("x"))
 }
 
-func TestCodeMatch(t *testing.T) {
+func TestMatch(t *testing.T) {
 
 	c := New("abcd")
 
@@ -31,7 +31,7 @@ func TestCodeMatch(t *testing.T) {
 	assert.False(t, c.Match(""))
 }
 
-func TestCodeMatchF(t *testing.T) {
+func TestMatchF(t *testing.T) {
 
 	c := New("ab")
 
@@ -41,58 +41,40 @@ func TestCodeMatchF(t *testing.T) {
 	assert.True(t, c.MatchF(unicode.IsLetter))
 	assert.False(t, c.MatchF(unicode.IsLetter))
 }
+func TestNextTailMore(t *testing.T) {
 
-func TestCodeMark(t *testing.T) {
+	s := New("a世c")
 
-	c := New("a")
+	assert.Equal(t, "a世c", s.Tail())
+	assert.True(t, s.More())
 
-	a := c.Mark()
-	c.Match("a")
-	b := c.Mark()
+	s.Next()
+	assert.Equal(t, "世c", s.Tail())
+	assert.True(t, s.More())
 
-	assert.Equal(t, Mark{pos: 0, row: 1, col: 1}, a)
-	assert.Equal(t, Mark{pos: 1, row: 1, col: 2}, b)
+	s.Next()
+	assert.Equal(t, "c", s.Tail())
+	assert.True(t, s.More())
+
+	s.Next()
+	assert.Equal(t, "", s.Tail())
+	assert.False(t, s.More())
+
+	// Test overflow.
+	s.Next()
+	assert.Equal(t, "", s.Tail())
+	assert.False(t, s.More())
 }
 
-func TestCodeBack(t *testing.T) {
-
-	c := New("a")
-
-	a := c.Mark()
-
-	assert.True(t, c.Match("a"))
-
-	c.Back(a)
-
-	assert.True(t, c.Match("a"))
-}
-
-func TestCodeToken(t *testing.T) {
+func TestMarkBackToken(t *testing.T) {
 
 	c := New("a")
 
 	ini := c.Mark()
 
-	c.Match("a")
+	c.Next()
 
 	end := c.Mark()
 
 	assert.Equal(t, "a", c.Token(ini, end).Text)
-}
-
-func TestCodeNext(t *testing.T) {
-
-	c := New("a世c")
-
-	aa := c.Mark()
-	c.Next()
-	bb := c.Mark()
-	c.Next()
-	cc := c.Mark()
-	c.Next()
-	dd := c.Mark()
-
-	assert.Equal(t, "a", c.Token(aa, bb).Text)
-	assert.Equal(t, "世", c.Token(bb, cc).Text)
-	assert.Equal(t, "c", c.Token(cc, dd).Text)
 }
