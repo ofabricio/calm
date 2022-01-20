@@ -181,8 +181,8 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Emits](#Emits)
 - [x] [Index](#Index)
 - [x] [Indexes](#Indexes)
-- [x] [Int](#Int)
-- [x] [Float](#Float)
+- [x] [ToInt](#ToInt)
+- [x] [ToFloat](#ToFloat)
 - [x] [Back Reference](#Back-Reference)
 
 #### Util
@@ -524,28 +524,28 @@ And(S("a"), S("b").On(Indexes(&pos)), S("c").On(Indexes(&pos))).Run(c)
 fmt.Println(pos) // [1 2]
 ```
 
-### Int
+### ToInt
 
-Int captures the current token and converts it to integer.
+ToInt captures the current token and converts it to integer.
 
 ```go
 c := New("123")
 
 var v int
-Next().OneToMany().On(Int(&v)).Run(c)
+Next().OneToMany().On(ToInt(&v)).Run(c)
 
 fmt.Println(v) // 123
 ```
 
-### Float
+### ToFloat
 
-Float captures the current token and converts it to float.
+ToFloat captures the current token and converts it to float.
 
 ```go
 c := New("1.2")
 
 var v float64
-Next().OneToMany().On(Float(&v)).Run(c)
+Next().OneToMany().On(ToFloat(&v)).Run(c)
 
 fmt.Println(v) // 1.2
 ```

@@ -57,15 +57,15 @@ func Indexes(is *[]int) func(Token) {
 	}
 }
 
-// Int captures the current token and converts it to integer.
-func Int(v *int) func(Token) {
+// ToInt captures the current token and converts it to integer.
+func ToInt(v *int) func(Token) {
 	return func(t Token) {
 		*v, _ = strconv.Atoi(t.Text)
 	}
 }
 
-// Float captures the current token and converts it to float.
-func Float(v *float64) func(Token) {
+// ToFloat captures the current token and converts it to float.
+func ToFloat(v *float64) func(Token) {
 	return func(t Token) {
 		*v, _ = strconv.ParseFloat(t.Text, 64)
 	}

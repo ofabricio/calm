@@ -169,7 +169,7 @@ func TestIndexes(t *testing.T) {
 	}
 }
 
-func TestInt(t *testing.T) {
+func TestToInt(t *testing.T) {
 
 	tt := []struct {
 		in string
@@ -186,14 +186,14 @@ func TestInt(t *testing.T) {
 		c := New(tc.in)
 
 		var v int
-		ok := Next().OneToMany().On(Int(&v)).Run(c)
+		ok := Next().OneToMany().On(ToInt(&v)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, v, tc.in)
 	}
 }
 
-func TestFloat(t *testing.T) {
+func TestToFloat(t *testing.T) {
 
 	tt := []struct {
 		in string
@@ -212,7 +212,7 @@ func TestFloat(t *testing.T) {
 		c := New(tc.in)
 
 		var v float64
-		ok := Next().OneToMany().On(Float(&v)).Run(c)
+		ok := Next().OneToMany().On(ToFloat(&v)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, v, tc.in)
