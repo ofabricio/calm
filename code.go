@@ -35,7 +35,7 @@ func (c *Code) Match(s string) bool {
 // advances the position if true.
 func (c *Code) MatchF(f func(rune) bool) bool {
 	if r, _ := c.decodeRune(); f(r) {
-		c.Next()
+		c.advanceC(r)
 		return true
 	}
 	return false
