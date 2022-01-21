@@ -34,7 +34,7 @@ func (c *Code) Match(s string) bool {
 // with the current position and
 // advances the position if true.
 func (c *Code) MatchF(f func(rune) bool) bool {
-	if r, _ := c.decodeRune(); f(r) {
+	if r := c.Curr(); f(r) {
 		c.advanceC(r)
 		return true
 	}
@@ -60,8 +60,12 @@ func (c *Code) Token(ini, end Mark) Token {
 
 // Next moves the position to the next character.
 func (c *Code) Next() {
-	r, _ := c.decodeRune()
-	c.advanceC(r)
+	c.advanceC(c.Curr())
+}
+
+func (c *Code) Curr() rune {
+	r, _ := utf8.DecodeRuneInString(c.Tail())
+	return r
 }
 
 // Tail returns the content from the
@@ -86,10 +90,6 @@ func (c *Code) advanceC(r rune) {
 		c.rowcol(r)
 		c.pos += utf8.RuneLen(r)
 	}
-}
-
-func (c *Code) decodeRune() (rune, int) {
-	return utf8.DecodeRuneInString(c.Tail())
 }
 
 func (c *Code) rowcol(r rune) {
