@@ -86,7 +86,7 @@ func (c *Code) advance(s string) {
 }
 
 func (c *Code) advanceC(r rune) {
-	if c.pos < len(c.src) {
+	if c.More() {
 		c.rowcol(r)
 		c.pos += utf8.RuneLen(r)
 	}
