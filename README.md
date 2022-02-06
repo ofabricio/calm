@@ -320,8 +320,6 @@ ok := S("hello").False().Run(c)
 fmt.Println(ok) // false
 ```
 
-Note that the cursor advances even though it returns false.
-
 ### If
 
 If runs the second argument if the first argument returns true
