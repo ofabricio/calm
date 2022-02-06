@@ -1,5 +1,7 @@
 package calm
 
+import "regexp"
+
 // S tests if the current token matches a
 // string and moves the position if true.
 func S(s string) MatcherFunc {
@@ -22,6 +24,15 @@ func F(fn func(rune) bool) MatcherFunc {
 	return MatcherFunc(func(c *Code) bool {
 		return c.MatchF(fn)
 	}).More()
+}
+
+// R tests if the current token matches a regular
+// expression and moves the position if true.
+func R(regex string) MatcherFunc {
+	r := regexp.MustCompile(regex)
+	return func(c *Code) bool {
+		return c.Match(r.FindString(c.Tail()))
+	}
 }
 
 // Eq tests if the current token equals a

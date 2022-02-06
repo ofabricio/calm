@@ -136,7 +136,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [S](#S)
 - [x] [SR](#SR)
 - [x] [F](#F)
-- [ ] Regex
+- [x] [R](#R)
 
 #### Tester
 
@@ -224,6 +224,18 @@ fmt.Println(a, b, c) // true true false
 
 SR behaves exactly the same as [S](#S) but receives a string reference as argument.
 This allows [Back Reference](#Back-Reference).
+
+### R
+
+R tests if the current token matches a regular expression and moves the position if true.
+
+```go
+c := New("hi5")
+
+a := R("hi\\d").Run(c)
+
+fmt.Println(a) // true
+```
 
 ### Eq
 

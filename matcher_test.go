@@ -28,7 +28,7 @@ func TestSR(t *testing.T) {
 	}
 }
 
-func TestS_F(t *testing.T) {
+func TestS_F_R(t *testing.T) {
 
 	tt := []struct {
 		in string
@@ -39,6 +39,8 @@ func TestS_F(t *testing.T) {
 		{"b", false, S("a")},
 		{"abc", true, S("abc")},
 		{"cba", false, S("abc")},
+		{"a1c", true, R("\\w\\d\\w")},
+		{"a1c", false, R("\\d\\w\\d")},
 		{"b", true, F(unicode.IsLetter)},
 		{"1", false, F(unicode.IsLetter)},
 	}
