@@ -15,18 +15,18 @@ func (m MatcherFunc) OneToMany() MatcherFunc {
 // ZeroToOne matches an optional token.
 // It is equivalent to the regex '?' symbol.
 func (m MatcherFunc) ZeroToOne() MatcherFunc {
-	return m.True().More()
+	return m.True()
 }
 
 // Min matches a minimum number of tokens.
 func (t MatcherFunc) Min(n int) MatcherFunc {
-	return MatcherFunc(func(c *Code) bool {
+	return func(c *Code) bool {
 		i := 0
 		for t(c) {
 			i++
 		}
 		return i >= n
-	}).More()
+	}
 }
 
 // Until matches until some matcher return true.

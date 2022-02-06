@@ -16,7 +16,7 @@ func TestRepetition(t *testing.T) {
 		ex string
 	}{
 		// ZeroToMany
-		{"", false, S("a").ZeroToMany(), ""},
+		{"", true, S("a").ZeroToMany(), ""},
 		{"b", true, S("a").ZeroToMany(), ""},
 		{"a", true, S("a").ZeroToMany(), "a"},
 		{"aa", true, S("a").ZeroToMany(), "aa"},
@@ -30,12 +30,12 @@ func TestRepetition(t *testing.T) {
 		{"aaa", true, S("a").OneToMany(), "aaa"},
 		{"aaab", true, S("a").OneToMany(), "aaa"},
 		// ZeroToOne
-		{"", false, S("a").ZeroToOne(), ""},
+		{"", true, S("a").ZeroToOne(), ""},
 		{"b", true, S("a").ZeroToOne(), ""},
 		{"a", true, S("a").ZeroToOne(), "a"},
 		{"aa", true, S("a").ZeroToOne(), "a"},
 		// Min
-		{"", false, S("a").Min(0), ""},
+		{"", true, S("a").Min(0), ""},
 		{"a", true, S("a").Min(0), "a"},
 		{"aa", true, S("a").Min(0), "aa"},
 		{"", false, S("a").Min(1), ""},
@@ -82,16 +82,16 @@ func Test_End_Of_Source_Code(t *testing.T) {
 		{"a", S("a"), true, false},
 		{"b", F(unicode.IsPrint), true, false},
 		//
-		{"", S("c").ZeroToMany(), false, false},
-		{"c", S("c").ZeroToMany(), true, false},
-		{"cc", S("c").ZeroToMany(), true, false},
+		{"", S("c").ZeroToMany(), true, true},
+		{"c", S("c").ZeroToMany(), true, true},
+		{"cc", S("c").ZeroToMany(), true, true},
 		//
 		{"", S("d").OneToMany(), false, false},
 		{"d", S("d").OneToMany(), true, false},
 		{"dd", S("d").OneToMany(), true, false},
 		//
-		{"", S("e").ZeroToOne(), false, false},
-		{"e", S("e").ZeroToOne(), true, false},
+		{"", S("e").ZeroToOne(), true, true},
+		{"e", S("e").ZeroToOne(), true, true},
 		{"f", S("e").ZeroToOne(), true, true},
 		//
 		{"", Eq("g"), false, false},
