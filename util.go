@@ -30,14 +30,8 @@ func (m MatcherFunc) Debug() MatcherFunc {
 func Json() MatcherFunc {
 	// BNF from https://www.json.org
 	ws := F(unicode.IsSpace).ZeroToMany()
-	sign := Or(S("+"), S("-")).ZeroToOne()
-	digits := F(unicode.IsDigit).OneToMany()
-	exponent := And(Or(S("E"), S("e")), sign, digits).ZeroToOne()
-	fraction := And(S("."), digits).ZeroToOne()
-	integer := And(S("-").ZeroToOne(), digits)
-	number := And(integer, fraction, exponent)
 	value := MatcherFunc(func(c *Code) bool {
-		return And(ws, Or(S("true"), S("false"), S("null"), number, String("\""), Json()), ws).Run(c)
+		return And(ws, Or(S("true"), S("false"), S("null"), Number(), String("\""), Json()), ws).Run(c)
 	})
 	objField := And(ws, String("\""), ws, S(":"), value)
 	emptyObj := And(S("{"), ws, S("}")).Undo()
@@ -45,4 +39,14 @@ func Json() MatcherFunc {
 	obj := And(S("{"), objField, And(S(","), objField).ZeroToMany(), S("}"))
 	arr := And(S("["), value, And(S(","), value).ZeroToMany(), S("]"))
 	return Or(emptyObj, obj, emptyArr, arr)
+}
+
+// Number matches numbers.
+func Number() MatcherFunc {
+	integer := And(S("-").ZeroToOne(), F(unicode.IsDigit).OneToMany())
+	sign := Or(S("+"), S("-")).ZeroToOne()
+	digits := F(unicode.IsDigit).OneToMany()
+	exponent := If(Or(S("E"), S("e")), And(sign, digits), True())
+	fraction := If(S("."), digits, True())
+	return And(integer, fraction, exponent)
 }

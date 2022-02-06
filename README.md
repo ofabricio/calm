@@ -191,6 +191,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Debug](#Debug)
 - [x] [String](#String)
 - [x] [Json](#Json)
+- [x] [Number](#Number)
 
 ### S
 
@@ -653,4 +654,21 @@ root := Or(jsns, Next()).OneToMany()
 ok := root.Run(c)
 
 fmt.Println(ok, jsons) // true [{ "hello": "world" } { "foo": "bar" }]
+```
+
+### Number
+
+Number matches numbers.
+
+```go
+c := New("Heard of 3.1415? What about 0, 1, 1, 2, 3 sequence? Isn't 2e3 a cool notation?")
+
+var n []string
+
+numb := Number().On(Grabs(&n))
+root := Or(numb, Next()).OneToMany()
+
+ok := root.Run(c)
+
+fmt.Println(ok, n) // true [3.14159 0 1 1 2 3 2e3]
 ```

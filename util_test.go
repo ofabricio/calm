@@ -108,3 +108,36 @@ func TestJson(t *testing.T) {
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
 }
+
+func TestMatcherFunc_Number(t *testing.T) {
+
+	tt := []struct {
+		in string
+		ok bool
+		mf MatcherFunc
+		ex string
+	}{
+		{"", false, Number(), ""},
+		{"1", true, Number(), "1"},
+		{"1.", false, Number(), ""},
+		{"0.0", true, Number(), "0.0"},
+		{"1.234", true, Number(), "1.234"},
+		{"1.2e", false, Number(), ""},
+		{"1.2E10", true, Number(), "1.2E10"},
+		{"1.2e2", true, Number(), "1.2e2"},
+		{"1.5e-3", true, Number(), "1.5e-3"},
+		{"1.77e+4", true, Number(), "1.77e+4"},
+		{"-20.45", true, Number(), "-20.45"},
+	}
+
+	for _, tc := range tt {
+
+		c := New(tc.in)
+
+		var tk string
+		ok := tc.mf.On(Grab(&tk)).Run(c)
+
+		assert.Equal(t, tc.ok, ok, tc.in)
+		assert.Equal(t, tc.ex, tk, tc.in)
+	}
+}
