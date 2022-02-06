@@ -31,7 +31,7 @@ func Json() MatcherFunc {
 	// BNF from https://www.json.org
 	ws := F(unicode.IsSpace).ZeroToMany()
 	sign := Or(S("+"), S("-")).ZeroToOne()
-	digits := F(unicode.IsNumber).OneToMany()
+	digits := F(unicode.IsDigit).OneToMany()
 	exponent := And(Or(S("E"), S("e")), sign, digits).ZeroToOne()
 	fraction := And(S("."), digits).ZeroToOne()
 	integer := And(S("-").ZeroToOne(), digits)
