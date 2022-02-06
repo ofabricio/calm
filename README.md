@@ -150,6 +150,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Not](#Not)
 - [x] [True](#True)
 - [x] [False](#False)
+- [x] [If](#If)
 
 #### Repetition
 
@@ -319,6 +320,20 @@ fmt.Println(ok) // false
 ```
 
 Note that the cursor advances even though it returns false.
+
+### If
+
+If runs the second argument if the first argument returns true
+or runs the third argument if the first argument returns false.
+
+```go
+m := If(S("."), S("1"), S("0"))
+
+a := m.Run(New(".1"))
+b := m.Run(New("0"))
+
+fmt.Println(a, b) // true true
+```
 
 ### ZeroToMany
 

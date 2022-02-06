@@ -61,3 +61,13 @@ func False() MatcherFunc {
 		return false
 	}
 }
+
+// If runs 'then' if 'cond' is true or 'elze' if 'cond' is false.
+func If(cond MatcherFunc, then MatcherFunc, elze MatcherFunc) MatcherFunc {
+	return func(c *Code) bool {
+		if cond(c) {
+			return then(c)
+		}
+		return elze(c)
+	}
+}

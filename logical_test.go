@@ -75,3 +75,24 @@ func TestTrueFalseNot(t *testing.T) {
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}
 }
+
+func TestIf(t *testing.T) {
+
+	tt := []struct {
+		in string
+		ok bool
+		mf MatcherFunc
+	}{
+		{".", true, If(S("."), True(), False())},
+		{"@", false, If(S("."), True(), False())},
+	}
+
+	for _, tc := range tt {
+
+		c := New(tc.in)
+
+		ok := tc.mf.Run(c)
+
+		assert.Equal(t, tc.ok, ok, tc.in)
+	}
+}
