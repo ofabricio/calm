@@ -58,8 +58,10 @@ func TestTrueFalseNot(t *testing.T) {
 	}{
 		{"a", true, S("a").True()},
 		{"b", true, S("a").True()},
+		{"", true, True()},
 		{"a", false, S("a").False()},
 		{"b", false, S("a").False()},
+		{"", false, False()},
 		{"a", false, S("a").Not()},
 		{"b", true, S("a").Not()},
 	}

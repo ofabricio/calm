@@ -47,3 +47,17 @@ func (m MatcherFunc) False() MatcherFunc {
 		return m(c) && false
 	}
 }
+
+// True forces the current matcher to return true.
+func True() MatcherFunc {
+	return func(c *Code) bool {
+		return true
+	}
+}
+
+// False forces the current matcher to return false.
+func False() MatcherFunc {
+	return func(c *Code) bool {
+		return false
+	}
+}
