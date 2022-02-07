@@ -135,6 +135,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 - [x] [S](#S)
 - [x] [SR](#SR)
+- [x] [SOr](#SOr)
 - [x] [F](#F)
 - [x] [R](#R)
 
@@ -208,6 +209,26 @@ d := S("world").Run(m)
 fmt.Println(a, b, c, d) // true true false true
 ```
 
+### SR
+
+SR behaves exactly the same as [S](#S) but receives a string reference as argument.
+This allows [Back Reference](#Back-Reference).
+
+### SOr
+
+SOr tests if the current token matches any character of the string
+and moves the position if true.
+
+```go
+a := SOr("1a").Run(New("1"))
+b := SOr("1a").Run(New("a"))
+c := SOr("1a").Run(New("@"))
+
+fmt.Println(a, b, c) // true true false
+```
+
+Note that `SOr("ab")` is exactly the same as `Or(S("a"), S("b"))`.
+
 ### F
 
 F tests if the current character matches a rune function and moves the position if true.
@@ -221,11 +242,6 @@ c := F(unicode.IsLetter).Run(m) // 5
 
 fmt.Println(a, b, c) // true true false
 ```
-
-### SR
-
-SR behaves exactly the same as [S](#S) but receives a string reference as argument.
-This allows [Back Reference](#Back-Reference).
 
 ### R
 
@@ -597,7 +613,7 @@ It is possible to create a back reference with [Grab](#Grab) + [SR](#SR).
 ```go
 var quote string
 
-m := And(Or(S(`"`), S(`'`)).On(Grab(&quote)), F(unicode.IsLetter).OneToMany(), SR(&quote))
+m := And(SOr(`"'`).On(Grab(&quote)), F(unicode.IsLetter).OneToMany(), SR(&quote))
 
 a := m.Run(New(`"hello"`))
 b := m.Run(New(`'hello'`))

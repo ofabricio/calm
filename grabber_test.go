@@ -235,7 +235,7 @@ func TestBackReference_With_Grab_And_SR(t *testing.T) {
 		c := New(tc.in)
 
 		var quote string
-		ok := And(Or(S("\""), S("'")).On(Grab(&quote)), S("a"), SR(&quote)).Run(c)
+		ok := And(SOr(`"'`).On(Grab(&quote)), S("a"), SR(&quote)).Run(c)
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 	}

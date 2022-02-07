@@ -18,6 +18,22 @@ func SR(s *string) MatcherFunc {
 	}
 }
 
+// SOr tests if the current token matches any
+// character of the string s and moves the
+// position if true.
+func SOr(s string) MatcherFunc {
+	return func(c *Code) bool {
+		cur := c.Curr()
+		for _, r := range s {
+			if cur == r {
+				c.Next()
+				return true
+			}
+		}
+		return false
+	}
+}
+
 // F tests the current character against a rune
 // function and moves the position if true.
 func F(fn func(rune) bool) MatcherFunc {

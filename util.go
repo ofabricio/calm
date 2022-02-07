@@ -44,9 +44,9 @@ func Json() MatcherFunc {
 // Number matches numbers.
 func Number() MatcherFunc {
 	integer := And(S("-").ZeroToOne(), F(unicode.IsDigit).OneToMany())
-	sign := Or(S("+"), S("-")).ZeroToOne()
+	sign := SOr("+-").ZeroToOne()
 	digits := F(unicode.IsDigit).OneToMany()
-	exponent := If(Or(S("E"), S("e")), And(sign, digits), True())
+	exponent := If(SOr("Ee"), And(sign, digits), True())
 	fraction := If(S("."), digits, True())
 	return And(integer, fraction, exponent)
 }
