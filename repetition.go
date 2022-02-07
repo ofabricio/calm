@@ -30,11 +30,11 @@ func (t MatcherFunc) Min(n int) MatcherFunc {
 }
 
 // Until matches until some matcher return true.
-func Until(or ...Matcher) MatcherFunc {
+func Until(or ...MatcherFunc) MatcherFunc {
 	return Or(or...).Not().Next().OneToMany()
 }
 
 // While matches while any matcher returns true.
-func While(or ...Matcher) MatcherFunc {
+func While(or ...MatcherFunc) MatcherFunc {
 	return Or(or...).Next().OneToMany()
 }

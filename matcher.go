@@ -76,7 +76,3 @@ func (m MatcherFunc) Run(c *Code) bool {
 }
 
 type MatcherFunc func(*Code) bool
-
-type Matcher interface {
-	Run(*Code) bool
-}

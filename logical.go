@@ -2,10 +2,10 @@ package calm
 
 // Or tests each matcher and returns
 // true if one of them return true.
-func Or(ms ...Matcher) MatcherFunc {
+func Or(ms ...MatcherFunc) MatcherFunc {
 	return func(c *Code) bool {
 		for _, m := range ms {
-			if m.Run(c) {
+			if m(c) {
 				return true
 			}
 		}
@@ -15,10 +15,10 @@ func Or(ms ...Matcher) MatcherFunc {
 
 // And tests each matcher and returns
 // true if all of them return true.
-func And(ms ...Matcher) MatcherFunc {
+func And(ms ...MatcherFunc) MatcherFunc {
 	return func(c *Code) bool {
 		for _, m := range ms {
-			if !m.Run(c) {
+			if !m(c) {
 				return false
 			}
 		}
