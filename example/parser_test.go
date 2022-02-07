@@ -40,7 +40,6 @@ func ExampleGoProgram() {
 
 func (t *GoProgram) program() MatcherFunc {
 	return And(
-		t.comment().True(),
 		t.packageName(&t.Package),
 		t.imports(&t.Imports).ZeroToMany(),
 		t.globals().ZeroToMany(),
@@ -49,7 +48,6 @@ func (t *GoProgram) program() MatcherFunc {
 
 func (t *GoProgram) globals() MatcherFunc {
 	return Or(
-		t.comment().False(),
 		t.function(),
 		t.stop(),
 	)
@@ -60,6 +58,7 @@ func (t *GoProgram) function() MatcherFunc {
 	// How could it be handled? Should it?
 	var f GoFunction
 	return And(
+		t.comment().True(),
 		t.ws(),
 		S("func "),
 		t.ws(),
@@ -75,6 +74,7 @@ func (t *GoProgram) function() MatcherFunc {
 		S("}"),
 	).On(func(Token) {
 		t.Functions = append(t.Functions, f)
+		f = GoFunction{}
 	})
 }
 
@@ -83,11 +83,11 @@ func (t *GoProgram) statement(body *[]string) MatcherFunc {
 }
 
 func (t *GoProgram) imports(name *[]string) MatcherFunc {
-	return And(t.ws(), S("import "), String(`"`).On(Grabs(name)))
+	return And(t.comment().True(), t.ws(), S("import "), String(`"`).On(Grabs(name)))
 }
 
 func (t *GoProgram) packageName(name *string) MatcherFunc {
-	return And(t.ws(), S("package "), t.name().On(Grab(name)))
+	return And(t.comment().True(), t.ws(), S("package "), t.name().On(Grab(name)))
 }
 
 func (t *GoProgram) comment() MatcherFunc {
@@ -103,7 +103,7 @@ func (t *GoProgram) ws() MatcherFunc {
 }
 
 func (t *GoProgram) stop() MatcherFunc {
-	return F(unicode.IsPrint).False()
+	return Next().False()
 }
 
 type GoProgram struct {
