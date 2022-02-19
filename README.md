@@ -162,10 +162,6 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Until](#Until)
 - [x] [While](#While)
 
-#### Recursion
-
-- [x] [Recursive](#Recursive)
-
 #### Movement
 
 - [x] [Next](#Next)
@@ -193,6 +189,18 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [String](#String)
 - [x] [Json](#Json)
 - [x] [Number](#Number)
+
+#### Recursion
+
+- [x] [Recursive](#Recursive)
+
+#### Tree ([AST](#AST))
+
+- [x] [Leaf](#Leaf)
+- [x] [Root](#Root)
+- [x] [Enter](#Enter)
+- [x] [Leave](#Leave)
+- [x] [Group](#Group)
 
 ### S
 
@@ -432,60 +440,6 @@ b := m.Run(New("hello"))
 fmt.Println(a, b) // true false
 ```
 
-### Recursive
-
-Recursive allows a recursive call of a matcher.
-
-```go
-code := New("0+1*(2+3)*4")
-
-term, setTerm := Recursive()
-expr, setExpr := Recursive()
-
-value := F(unicode.IsNumber)
-factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*"), term).Undo(), factor))
-setExpr(Or(And(term, S("+"), expr).Undo(), term))
-
-ok := expr.Run(code)
-
-fmt.Println(ok) // true
-```
-
-But it's possible to avoid using this operator by using this approach:
-
-```go
-code := New("0+1*(2+3)*4")
-
-var term, expr, factor MatcherFunc
-
-value := F(unicode.IsNumber)
-
-factor = func(c *Code) bool {
-	return Or(And(S("("), expr, S(")")), value).Run(c)
-}
-
-term = func(c *Code) bool {
-	return Or(And(factor, S("*"), term).Undo(), factor).Run(c)
-}
-
-expr = func(c *Code) bool {
-	return Or(And(term, S("+"), expr).Undo(), term).Run(c)
-}
-
-ok := expr.Run(code)
-
-fmt.Println(ok) // true
-```
-
-This operator is handy for small validations,
-but it can be a pain when capturing tokens.
-
-See [here](example/expression_test.go) an example on how to recursively
-parse an expression without using this operator.
-
-> Note to self: maybe I should remove this operator.
-
 ### Next
 
 Next moves to the next character when the current matcher returns true.
@@ -715,3 +669,210 @@ ok := root.Run(c)
 
 fmt.Println(ok, n) // true [3.14159 0 1 1 2 3 2e3]
 ```
+
+### Recursive
+
+Recursive allows a recursive call of a matcher.
+
+```go
+code := New("0+1*(2+3)*4")
+
+term, setTerm := Recursive()
+expr, setExpr := Recursive()
+
+value := F(unicode.IsNumber)
+factor := Or(And(S("("), expr, S(")")), value)
+setTerm(Or(And(factor, S("*"), term).Undo(), factor))
+setExpr(Or(And(term, S("+"), expr).Undo(), term))
+
+ok := expr.Run(code)
+
+fmt.Println(ok) // true
+```
+
+But it's possible to avoid using this operator by using this approach:
+
+```go
+code := New("0+1*(2+3)*4")
+
+var term, expr, factor MatcherFunc
+
+value := F(unicode.IsNumber)
+
+factor = func(c *Code) bool {
+    return Or(And(S("("), expr, S(")")), value).Run(c)
+}
+
+term = func(c *Code) bool {
+    return Or(And(factor, S("*"), term).Undo(), factor).Run(c)
+}
+
+expr = func(c *Code) bool {
+    return Or(And(term, S("+"), expr).Undo(), term).Run(c)
+}
+
+ok := expr.Run(code)
+
+fmt.Println(ok) // true
+```
+
+This operator is handy for small validations,
+but it can be a pain when capturing tokens.
+See [here](example/expression_test.go) an example on how to recursively
+parse an expression without using this operator.
+
+For an easier and more advanced way to capture tokens see the [AST](#AST) section.
+
+> Note to self: maybe I should remove this operator.
+
+## AST
+
+You can parse an input code into an AST (Abstract Syntax Tree).
+
+For that, start the scanner with a root node:
+
+```go
+src := New("2+4")              // 1)
+ast := Root("Program")         // 2)
+oks := ast.Run(src, S("2+4"))  // 3)
+fmt.Println(oks, ast)
+```
+
+- In line 1) we create the scanner, as we have doing since the beginning.
+- In line 2) we create a root node of type "Program". Can be any string.
+  It is used to categorize a node.
+- In line 3) we run the scanner as an AST.
+
+If you run the code above nothing will happen. That's because we need to
+set up a few operators to capture the values we are interested in.
+
+When dealing with a tree there are many operators to use.
+
+### Leaf
+
+Leaf is the basic operator to capture a node.
+It creates a leaf node in the AST.
+Without it the other operators won't work.
+
+```go
+src := New("2+4")
+
+cod := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N"))
+
+ast := Root("Program")
+oks := ast.Run(src, cod)
+
+fmt.Println(oks, ast)
+// { "type": "Program", "args": [
+//     { "type": "N", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "N", "name": "4" }] } 
+```
+
+### Root
+
+Root converts three [Leaf](#Leaf) nodes into a binary branch.
+In other words, it will set the middle node as a root
+node and add the left and right nodes as its children.
+
+```go
+src := New("2+4")
+
+cod := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N")).Root()
+
+ast := Root("Program")
+oks := ast.Run(src, cod)
+
+fmt.Println(oks, ast)
+// { "type": "Program", "args": [
+//     { "type": "Op", "name": "+", "args": [
+//         { "type": "N", "name": "2" }, { "type": "N", "name": "4" }] }] }
+```
+
+> Note to self: maybe this operator needs a better name.
+
+### Enter
+
+Enter makes the selected [Leaf](#Leaf) node a root node,
+so the next nodes are added as its children.
+In other words it increases the depth of the tree in that node.
+It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
+
+```go
+src := New("print { 1 }")
+
+cod := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" }"))
+
+ast := Root("Program")
+oks := ast.Run(src, cod)
+
+fmt.Println(oks, ast)
+// { "type": "Program", "args": [
+//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] }] }
+```
+
+> Note to self: maybe this operator needs a better name.
+
+### Leave
+
+Leave is the opposite of [Enter](#Enter).
+Useful to restore an AST depth.
+Make sure to Leave to a parent node.
+
+```go
+src := New("print { 1 } print { 1 } ")
+
+fun := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" } ")).Leave()
+cod := And(fun, fun)
+
+ast := Root("Program")
+oks := ast.Run(src, cod)
+
+fmt.Println(oks, ast)
+// { "type": "Program", "args": [
+//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] },
+//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] }] }
+```
+
+> Note to self: maybe this operator needs a better name.
+
+### Group
+
+Group groups nodes inside a node.
+
+```go
+src := New("print(1, 2)")
+
+num := F(unicode.IsDigit).Leaf("N")
+arg := And(num, S(", ").ZeroToOne()).ZeroToMany().Group("Args")
+cod := And(S("print").Leaf("FnCall").Enter(), S("("), arg, S(")"))
+
+ast := Root("Program")
+oks := ast.Run(src, cod)
+
+fmt.Println(oks, ast)
+// { "type": "Program", "args": [
+//     { "type": "FnCall", "name": "print", "args": [
+//         { "type": "Args", "args": [{ "type": "N", "name": "1" }, { "type": "N", "name": "2" }] }] }] }
+```
+
+### Examples
+
+Parsing an expression.
+
+```go
+src := New("2+3*4+(5+6)")
+
+term, setTerm := Recursive()
+expr, setExpr := Recursive()
+
+value := F(unicode.IsNumber).Leaf("N")
+factor := Or(And(S("("), expr, S(")")), value)
+setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Root().Undo(), factor))
+setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Root().Undo(), term))
+
+ast := Root("Program")
+ok := ast.Run(src, expr)
+
+fmt.Println(ok, ast)
+```
+
+More examples [here](/example/expression_ast_test.go).
