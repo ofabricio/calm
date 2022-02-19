@@ -105,6 +105,7 @@ type Code struct {
 	pos int    // Position/Index/Offset/Cursor.
 	row int    // Current line.
 	col int    // Current column.
+	ast *Ast   // Used to build an AST.
 }
 
 // Mark represents a mark in the code.

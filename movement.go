@@ -18,11 +18,11 @@ func (m MatcherFunc) Next() MatcherFunc {
 // beginning of the current matcher
 // if it returns false.
 func (m MatcherFunc) Undo() MatcherFunc {
-	return func(c *Code) bool {
+	return MatcherFunc(func(c *Code) bool {
 		if ini := c.Mark(); !m(c) {
 			c.Back(ini)
 			return false
 		}
 		return true
-	}
+	}).undoAst()
 }

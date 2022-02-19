@@ -434,7 +434,7 @@ fmt.Println(a, b) // true false
 
 ### Recursive
 
-Recursive allows recursive call of a matcher.
+Recursive allows a recursive call of a matcher.
 
 ```go
 code := New("0+1*(2+3)*4")
@@ -452,10 +452,39 @@ ok := expr.Run(code)
 fmt.Println(ok) // true
 ```
 
+But it's possible to avoid using this operator by using this approach:
+
+```go
+code := New("0+1*(2+3)*4")
+
+var term, expr, factor MatcherFunc
+
+value := F(unicode.IsNumber)
+
+factor = func(c *Code) bool {
+	return Or(And(S("("), expr, S(")")), value).Run(c)
+}
+
+term = func(c *Code) bool {
+	return Or(And(factor, S("*"), term).Undo(), factor).Run(c)
+}
+
+expr = func(c *Code) bool {
+	return Or(And(term, S("+"), expr).Undo(), term).Run(c)
+}
+
+ok := expr.Run(code)
+
+fmt.Println(ok) // true
+```
+
 This operator is handy for small validations,
 but it can be a pain when capturing tokens.
+
 See [here](example/expression_test.go) an example on how to recursively
 parse an expression without using this operator.
+
+> Note to self: maybe I should remove this operator.
 
 ### Next
 
