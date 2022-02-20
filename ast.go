@@ -16,17 +16,6 @@ func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
 	}
 }
 
-// Node grabs the current node.
-func (m MatcherFunc) Node(a *Ast) MatcherFunc {
-	return func(c *Code) bool {
-		if m(c) {
-			*a = *c.ast.Right()
-			return true
-		}
-		return false
-	}
-}
-
 // Leaf creates a leaf AST node.
 func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 	return func(c *Code) bool {

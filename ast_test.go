@@ -267,31 +267,6 @@ func TestRoot_When_False(t *testing.T) {
 	assert.Equal(t, exp, ast.String())
 }
 
-func TestNode(t *testing.T) {
-
-	// Given.
-
-	src := New("2+3")
-
-	// When.
-
-	var ast, a, b, c, d, e Ast
-
-	root := And(S("2").Leaf("V").Node(&a), S("+").Leaf("O").Node(&b), S("3").Leaf("V").Node(&c)).Node(&d).Root().Node(&e)
-
-	ok := root.Node(&ast).Run(src)
-
-	// Then.
-
-	assert.True(t, ok)
-	assert.Equal(t, `{ "type": "O", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }`, ast.String())
-	assert.Equal(t, `{ "type": "V", "name": "2" }`, a.String())
-	assert.Equal(t, `{ "type": "O", "name": "+" }`, b.String())
-	assert.Equal(t, `{ "type": "V", "name": "3" }`, c.String())
-	assert.Equal(t, `{ "type": "V", "name": "3" }`, d.String())
-	assert.Equal(t, `{ "type": "O", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }`, e.String())
-}
-
 func TestGroup(t *testing.T) {
 
 	// Given.
