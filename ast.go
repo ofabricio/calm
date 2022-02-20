@@ -74,6 +74,11 @@ func (m MatcherFunc) Enter() MatcherFunc {
 	}
 }
 
+// Child makes nodes children of a node.
+func (m MatcherFunc) Child(ms ...MatcherFunc) MatcherFunc {
+	return And(m.Enter(), And(ms...))
+}
+
 // Leave is the opposite of Enter. Useful
 // to restore an AST depth. Make sure to
 // Leave to a parent node.

@@ -135,6 +135,34 @@ func TestLeaf_When_False(t *testing.T) {
 	assert.Equal(t, exp, ast.String())
 }
 
+func TestChild(t *testing.T) {
+
+	// Given.
+
+	src := New("abcde")
+
+	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b" }, { "type": "L", "name": "c" }] }, { "type": "L", "name": "d" }, { "type": "L", "name": "e" }] }`
+
+	// When.
+
+	root := And(
+		S("a").Leaf("L").Child(
+			S("b").Leaf("L"),
+			S("c").Leaf("L"),
+		),
+		S("d").Leaf("L"),
+		S("e").Leaf("L"),
+	)
+
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
+
+	// Then.
+
+	assert.True(t, ok)
+	assert.Equal(t, exp, ast.String())
+}
+
 func TestEnter_And_Leave_With_And(t *testing.T) {
 
 	// Given.
