@@ -196,10 +196,12 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 #### Tree ([AST](#AST))
 
+- [x] [Tree](#Tree)
 - [x] [Leaf](#Leaf)
 - [x] [Root](#Root)
 - [x] [Enter](#Enter)
 - [x] [Leave](#Leave)
+- [x] [Child](#Child)
 - [x] [Group](#Group)
 
 ### S
@@ -731,40 +733,93 @@ For an easier and more advanced way to capture tokens see the [AST](#AST) sectio
 
 ## AST
 
-You can parse an input code into an AST (Abstract Syntax Tree).
+You can parse a text into an AST (Abstract Syntax Tree).
 
-For that, start the scanner with a root node:
+An AST node has only three information.
+
+- The `Type` field is a string to categorize nodes. You provide this information when building a tree.
+- The `Name` field is of type `Token` and holds information about a captured token (Text, Line, etc).
+- The `Args` field is a slice of children nodes.
+
+A tree always starts with a default root node of type `"Root"`.
+
+A [Leaf](#Leaf) node is the building block of a tree. This operator builds leaf nodes. Without it a tree would have empty nodes.
+
+A tree is only valid if the scanner returns `true`.
+
+#### How it works
+
+Let's take the example below. It has the input text `2+4`.
 
 ```go
-src := New("2+4")              // 1)
-ast := Root("Program")         // 2)
-oks := ast.Run(src, S("2+4"))  // 3)
-fmt.Println(oks, ast)
+code := New("2+4")
+root := And(S("2"), S("+"), S("4"))
+
+var ast Ast
+oks := root.Tree(&ast).Run(code)
+
+fmt.Println(oks, ast) // true { "type": "Root" }
 ```
 
-- In line 1) we create the scanner, as we have doing since the beginning.
-- In line 2) we create a root node of type "Program". Can be any string.
-  It is used to categorize a node.
-- In line 3) we run the scanner as an AST.
+If you run the code above the only thing you see is a `Root` node.
+That's because we didn't build any [Leaf](#Leaf) node yet.
+Let's fix this.
 
-If you run the code above nothing will happen. That's because we need to
-set up a few operators to capture the values we are interested in.
+```go
+// ...
+root := And(S("2"), S("+").Leaf("Op"), S("4"))
+// ...
+// { "type": "Root", "args": [{ "type": "Op", "name": "+" }] }
+```
 
-When dealing with a tree there are many operators to use.
+There we go, now we have a Leaf node.
+The `Leaf` operator always go with a matcher (`S` in this case). Let's capture the other matchers.
+
+```go
+// ...
+root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
+// ...
+// { "type": "Root", "args":
+//     [{ "type": "Val", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "Val", "name": "4" }] }
+```
+
+As you can see `Leaf` adds nodes in the parent node. Remember there is always a default `Root` node.
+
+This is not a fancy tree, it's just an introduction.
+There are more operators to compose an advanced tree.
+They are described in their own section below.
+
+### Tree
+
+Tree is where you get the AST result.
+
+```go
+code := New("2+4")
+root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
+
+var ast Ast
+oks := root.Tree(&ast).Run(code)
+
+fmt.Println(oks, ast)
+// { "type": "Root", "args":
+//     [{ "type": "Val", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "Val", "name": "4" }] }
+```
+
+Note that `Tree` grabbed the `Root` node along with the `Leaf` nodes.
 
 ### Leaf
 
-Leaf is the basic operator to capture a node.
+Leaf is the basic operator to build a node.
 It creates a leaf node in the AST.
-Without it the other operators won't work.
+Without it the tree would have empty nodes.
 
 ```go
 src := New("2+4")
 
-cod := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N"))
+root := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N"))
 
-ast := Root("Program")
-oks := ast.Run(src, cod)
+var ast Ast
+oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast)
 // { "type": "Program", "args": [
@@ -780,10 +835,10 @@ node and add the left and right nodes as its children.
 ```go
 src := New("2+4")
 
-cod := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N")).Root()
+root := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N")).Root()
 
-ast := Root("Program")
-oks := ast.Run(src, cod)
+var ast Ast
+oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast)
 // { "type": "Program", "args": [
@@ -803,10 +858,10 @@ It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
 ```go
 src := New("print { 1 }")
 
-cod := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" }"))
+root := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" }"))
 
-ast := Root("Program")
-oks := ast.Run(src, cod)
+var ast Ast
+oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast)
 // { "type": "Program", "args": [
@@ -819,43 +874,74 @@ fmt.Println(oks, ast)
 
 Leave is the opposite of [Enter](#Enter).
 Useful to restore an AST depth.
-Make sure to Leave to a parent node.
+You don't use it directly.
+`And` operator calls it automatically.
+So every time `And` exits the depth is restored.
 
 ```go
-src := New("print { 1 } print { 1 } ")
+src := New("abcd")
 
-fun := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" } "))
-cod := And(fun, fun)
+cod := And(
+    And(S("a").Leaf("L").Enter(), S("b").Leaf("L")),
+    And(S("c").Leaf("L").Enter(), S("d").Leaf("L")),
+)
 
-ast := Root("Program")
-oks := ast.Run(src, cod)
+var ast Ast
+oks := cod.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast)
-// { "type": "Program", "args": [
-//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] },
-//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] }] }
+// { "type": "Root", "args":
+//     [{ "type": "L", "name": "a", "args":
+//         [{ "type": "L", "name": "b" }] }, { "type": "L", "name": "c", "args": 
+//              [{ "type": "L", "name": "d" }] }] }
 ```
 
 > Note to self: maybe this operator needs a better name.
+
+### Child
+
+Child makes nodes children of a node.
+It is similar to `Enter` + `Leave`, but it requires no `And`.
+
+```go
+src := New("abcd")
+
+root := And(
+    S("a").Leaf("L").Child(
+        S("b").Leaf("L"),
+        S("c").Leaf("L"),
+    ),
+    S("d").Leaf("L"),
+)
+
+var ast Ast
+oks := root.Tree(&ast).Run(src)
+
+fmt.Println(oks, ast)
+// { "type": "Root", "args":
+//     [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b" }, { "type": "L", "name": "c" }] },
+//      { "type": "L", "name": "d" }] }
+```
 
 ### Group
 
 Group groups nodes inside a node.
 
 ```go
-src := New("print(1, 2)")
+src := New("ab12")
 
-num := F(unicode.IsDigit).Leaf("N")
-arg := And(num, S(", ").ZeroToOne()).ZeroToMany().Group("Args")
-cod := And(S("print").Leaf("FnCall").Enter(), S("("), arg, S(")"))
+cod := And(
+    And(S("a").Leaf("L"), S("b").Leaf("L")).Group("Letters"),
+    And(S("1").Leaf("N"), S("2").Leaf("N")).Group("Numbers"),
+)
 
-ast := Root("Program")
-oks := ast.Run(src, cod)
+var ast Ast
+oks := cod.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast)
-// { "type": "Program", "args": [
-//     { "type": "FnCall", "name": "print", "args": [
-//         { "type": "Args", "args": [{ "type": "N", "name": "1" }, { "type": "N", "name": "2" }] }] }] }
+// { "type": "Root", "args":
+//     [{ "type": "Letters", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }] },
+//      { "type": "Numbers", "args": [{ "type": "N", "name": "1" }, { "type": "N", "name": "2" }] }] }
 ```
 
 ### Examples
@@ -873,10 +959,10 @@ factor := Or(And(S("("), expr, S(")")), value)
 setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor))
 setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term))
 
-ast := Root("Program")
-ok := ast.Run(src, expr)
+var ast Ast
+oks := expr.Tree(&ast).Run(src)
 
-fmt.Println(ok, ast)
+fmt.Println(oks, ast)
 ```
 
 More examples [here](/example/expression_ast_test.go).
