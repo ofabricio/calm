@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Tree captures an AST by the parent node.
+// Tree grabs a node by its parent.
 func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
 	return func(c *Code) bool {
 		if m(c) {
@@ -16,7 +16,7 @@ func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
 	}
 }
 
-// Node captures an AST by the current node.
+// Node grabs the current node.
 func (m MatcherFunc) Node(a *Ast) MatcherFunc {
 	return func(c *Code) bool {
 		if m(c) {
