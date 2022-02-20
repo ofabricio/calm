@@ -149,6 +149,23 @@ func (a Ast) String() string {
 	return fmt.Sprintf(`{ "type": "%s"%s%s }`, a.Type, name, args)
 }
 
+// Print returns a short string representation of the AST.
+func (a *Ast) Print() string {
+	var name string
+	var args string
+	if a.Name.Text != "" {
+		name = " " + a.Name.Text
+	}
+	if len(a.Args) != 0 {
+		var argz []string
+		for _, n := range a.Args {
+			argz = append(argz, n.Print())
+		}
+		args = fmt.Sprintf(` [ %s ]`, strings.Join(argz, ", "))
+	}
+	return fmt.Sprintf(`%s%s%s`, a.Type, name, args)
+}
+
 // Walk traverses an AST.
 func Walk(v Visitor, node *Ast) {
 	if v = v.Visit(node); v == nil {

@@ -758,29 +758,29 @@ root := And(S("2"), S("+"), S("4"))
 var ast Ast
 oks := root.Tree(&ast).Run(code)
 
-fmt.Println(oks, ast) // true { "type": "Root" }
+fmt.Println(oks, ast)
+// true { "type": "Root" }
 ```
 
 If you run the code above the only thing you see is a `Root` node.
 That's because we didn't build any [Leaf](#Leaf) node yet.
 Let's fix this.
 
+> **Note** that we print the `ast` in JSON format.
+But from now on we will print using a shorter, nicer form with the `ast.Print()` function.
+
 ```go
-// ...
 root := And(S("2"), S("+").Leaf("Op"), S("4"))
-// ...
-// { "type": "Root", "args": [{ "type": "Op", "name": "+" }] }
+fmt.Println(oks, ast.Print())
+// Root [ Op + ]
 ```
 
 There we go, now we have a Leaf node.
 The `Leaf` operator always go with a matcher (`S` in this case). Let's capture the other matchers.
 
 ```go
-// ...
 root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
-// ...
-// { "type": "Root", "args":
-//     [{ "type": "Val", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "Val", "name": "4" }] }
+// Root [ Val 2, Op +, Val 4 ]
 ```
 
 As you can see `Leaf` adds nodes in the parent node. Remember there is always a default `Root` node.
@@ -800,12 +800,11 @@ root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 var ast Ast
 oks := root.Tree(&ast).Run(code)
 
-fmt.Println(oks, ast)
-// { "type": "Root", "args":
-//     [{ "type": "Val", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "Val", "name": "4" }] }
+fmt.Println(oks, ast.Print())
+// Root [ Val 2, Op +, Val 4 ]
 ```
 
-Note that `Tree` grabbed the `Root` node along with the `Leaf` nodes.
+Note that `Tree` captured the `Root` node along with the `Leaf` nodes.
 
 ### Leaf
 
@@ -816,14 +815,13 @@ Without it the tree would have empty nodes.
 ```go
 src := New("2+4")
 
-root := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N"))
+root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Program", "args": [
-//     { "type": "N", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "N", "name": "4" }] } 
+fmt.Println(oks, ast.Print())
+// Root [ Val 2, Op +, Val 4 ]
 ```
 
 ### Root
@@ -835,15 +833,13 @@ node and add the left and right nodes as its children.
 ```go
 src := New("2+4")
 
-root := And(S("2").Leaf("N"), S("+").Leaf("Op"), S("4").Leaf("N")).Root()
+root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val")).Root()
 
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Program", "args": [
-//     { "type": "Op", "name": "+", "args": [
-//         { "type": "N", "name": "2" }, { "type": "N", "name": "4" }] }] }
+fmt.Println(oks, ast.Print())
+// Root [ Op + [ Val 2, Val 4 ] ]
 ```
 
 > Note to self: maybe this operator needs a better name.
@@ -856,16 +852,15 @@ In other words it increases the depth of the tree in that node.
 It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
 
 ```go
-src := New("print { 1 }")
+src := New("print(1)")
 
-root := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" }"))
+root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")"))
 
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Program", "args": [
-//     { "type": "FnCall", "name": "print", "args": [{ "type": "N", "name": "1" }] }] }
+fmt.Println(oks, ast.Print())
+// Root [ FnCall print [ Val 1 ] ]
 ```
 
 > Note to self: maybe this operator needs a better name.
@@ -882,18 +877,15 @@ So every time `And` exits the depth is restored.
 src := New("abcd")
 
 cod := And(
-    And(S("a").Leaf("L").Enter(), S("b").Leaf("L")),
-    And(S("c").Leaf("L").Enter(), S("d").Leaf("L")),
+    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")),
+    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")),
 )
 
 var ast Ast
 oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Root", "args":
-//     [{ "type": "L", "name": "a", "args":
-//         [{ "type": "L", "name": "b" }] }, { "type": "L", "name": "c", "args": 
-//              [{ "type": "L", "name": "d" }] }] }
+fmt.Println(oks, ast.Print())
+// Root [ Char a [ Char b ], Char c [ Char d ] ]
 ```
 
 > Note to self: maybe this operator needs a better name.
@@ -906,21 +898,19 @@ It is similar to `Enter` + `Leave`, but it requires no `And`.
 ```go
 src := New("abcd")
 
-root := And(
-    S("a").Leaf("L").Child(
-        S("b").Leaf("L"),
-        S("c").Leaf("L"),
+cod := And(
+    S("a").Leaf("Char").Child(
+        S("b").Leaf("Char"),
+        S("c").Leaf("Char"),
     ),
-    S("d").Leaf("L"),
+    S("d").Leaf("Char"),
 )
 
 var ast Ast
-oks := root.Tree(&ast).Run(src)
+oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Root", "args":
-//     [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b" }, { "type": "L", "name": "c" }] },
-//      { "type": "L", "name": "d" }] }
+fmt.Println(oks, ast.Print())
+// Root [ Char a [ Char b, Char c ], Char d ]
 ```
 
 ### Group
@@ -938,13 +928,11 @@ cod := And(
 var ast Ast
 oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
-// { "type": "Root", "args":
-//     [{ "type": "Letters", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }] },
-//      { "type": "Numbers", "args": [{ "type": "N", "name": "1" }, { "type": "N", "name": "2" }] }] }
+fmt.Println(oks, ast.Print())
+// Root [ Letters [ L a, L b ], Numbers [ N 1, N 2 ] ]
 ```
 
-### Examples
+### AST Examples
 
 Parsing an expression.
 
@@ -954,15 +942,16 @@ src := New("2+3*4+(5+6)")
 term, setTerm := Recursive()
 expr, setExpr := Recursive()
 
-value := F(unicode.IsNumber).Leaf("N")
+value := F(unicode.IsDigit).Leaf("Val")
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor))
-setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term))
+setTerm(Or(And(factor, S("*").Leaf("Expr"), term).Root(), factor))
+setExpr(Or(And(term, S("+").Leaf("Expr"), expr).Root(), term))
 
 var ast Ast
 oks := expr.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast)
+fmt.Println(oks, ast.Print())
+// Root [ Expr + [ Val 2, Expr + [ Expr * [ Val 3, Val 4 ], Expr + [ Val 5, Val 6 ] ] ] ]
 ```
 
 More examples [here](/example/expression_ast_test.go).
