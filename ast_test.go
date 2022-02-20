@@ -21,7 +21,7 @@ func TestAst(t *testing.T) {
 		D()
 	}`)
 
-	exp := `{ "type": "Program", "args": [{ "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "One" }, { "type": "Args", "args": [{ "type": "Var", "name": "a" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "A" }, { "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "Two" }, { "type": "Args", "args": [{ "type": "Var", "name": "b" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "B" }, { "type": "FnCall", "name": "C" }] }] }, { "type": "FnCall", "name": "D" }] }] }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "One" }, { "type": "Args", "args": [{ "type": "Var", "name": "a" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "A" }, { "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "Two" }, { "type": "Args", "args": [{ "type": "Var", "name": "b" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "B" }, { "type": "FnCall", "name": "C" }] }] }, { "type": "FnCall", "name": "D" }] }] }] }`
 
 	// When.
 
@@ -42,9 +42,8 @@ func TestAst(t *testing.T) {
 		return And(wz, S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Leave().Run(c)
 	}
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, fnDefn)
+	var ast Ast
+	ok := fnDefn.Tree(&ast).Run(src)
 
 	// Then.
 
@@ -60,10 +59,10 @@ func TestAst_Expression(t *testing.T) {
 		inp string
 		exp string
 	}{
-		{"2+3", `{ "type": "Program", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }] }`},
-		{"2+3*4", `{ "type": "Program", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }] }] }`},
-		{"2*3+4", `{ "type": "Program", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }, { "type": "Value", "name": "4" }] }] }`},
-		{"2*(3+4)*5", `{ "type": "Program", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }, { "type": "Value", "name": "5" }] }] }] }`},
+		{"2+3", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }] }`},
+		{"2+3*4", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }] }] }`},
+		{"2*3+4", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }, { "type": "Value", "name": "4" }] }] }`},
+		{"2*(3+4)*5", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }, { "type": "Value", "name": "5" }] }] }] }`},
 	}
 
 	for _, tc := range tt {
@@ -88,9 +87,8 @@ func TestAst_Expression(t *testing.T) {
 			return Or(And(term, S("+").Leaf("BinExpr"), expr).Root().Undo(), term).Run(c)
 		}
 
-		ast := Root("Program")
-
-		ok := ast.Run(src, expr)
+		var ast Ast
+		ok := MatcherFunc(expr).Tree(&ast).Run(src)
 
 		// Then.
 
@@ -105,13 +103,12 @@ func TestLeaf(t *testing.T) {
 
 	src := New("abc")
 
-	exp := `{ "type": "Program", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }, { "type": "L", "name": "c" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }, { "type": "L", "name": "c" }] }`
 
 	// When.
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, F(unicode.IsLetter).Leaf("L").OneToMany())
+	var ast Ast
+	ok := F(unicode.IsLetter).Leaf("L").OneToMany().Tree(&ast).Run(src)
 
 	// Then.
 
@@ -125,13 +122,12 @@ func TestLeaf_When_False(t *testing.T) {
 
 	src := New("a23")
 
-	exp := `{ "type": "Program", "args": [{ "type": "L", "name": "a" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }] }`
 
 	// When.
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, F(unicode.IsLetter).Leaf("L").OneToMany())
+	var ast Ast
+	ok := F(unicode.IsLetter).Leaf("L").OneToMany().Tree(&ast).Run(src)
 
 	// Then.
 
@@ -145,11 +141,11 @@ func TestEnterLeave(t *testing.T) {
 
 	src := New("abcde")
 
-	exp := `{ "type": "Program", "args": [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b", "args": [{ "type": "L", "name": "c" }] }] }, { "type": "L", "name": "d" }, { "type": "L", "name": "e" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b", "args": [{ "type": "L", "name": "c" }] }] }, { "type": "L", "name": "d" }, { "type": "L", "name": "e" }] }`
 
 	// When.
 
-	cod := And(
+	root := And(
 		And(
 			S("a").Leaf("L").Enter(),
 			S("b").Leaf("L").Enter(),
@@ -159,9 +155,8 @@ func TestEnterLeave(t *testing.T) {
 		S("e").Leaf("L"),
 	)
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 
@@ -175,21 +170,23 @@ func TestLeave_When_False(t *testing.T) {
 
 	src := New("ab")
 
-	exp := `{ "type": "Program", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }] }`
 
 	// When.
 
-	cod := Or(
+	root := Or(
 		And(
 			S("a").Leaf("L").Enter(),
 			S("x").Leaf("L"),
+		).Leave().Undo(),
+		And(
+			S("a").Leaf("L"),
+			S("b").Leaf("L"),
 		).Leave(),
-		S("b").Leaf("L"),
 	)
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 
@@ -203,15 +200,14 @@ func TestRoot(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Program", "args": [{ "type": "Op", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "Op", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }] }`
 
 	// When.
 
-	cod := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root()
+	root := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root()
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 
@@ -225,23 +221,47 @@ func TestRoot_When_False(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Program", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "Op", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }] }`
 
 	// When.
 
-	cod := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Root(),
-		S("+").Leaf("Op"),
+	root := Or(
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Root().Undo(),
+		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root(),
 	)
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 
 	assert.True(t, ok)
 	assert.Equal(t, exp, ast.String())
+}
+
+func TestNode(t *testing.T) {
+
+	// Given.
+
+	src := New("2+3")
+
+	// When.
+
+	var ast, a, b, c, d, e Ast
+
+	root := And(S("2").Leaf("V").Node(&a), S("+").Leaf("O").Node(&b), S("3").Leaf("V").Node(&c)).Node(&d).Root().Node(&e)
+
+	ok := root.Node(&ast).Run(src)
+
+	// Then.
+
+	assert.True(t, ok)
+	assert.Equal(t, `{ "type": "O", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }`, ast.String())
+	assert.Equal(t, `{ "type": "V", "name": "2" }`, a.String())
+	assert.Equal(t, `{ "type": "O", "name": "+" }`, b.String())
+	assert.Equal(t, `{ "type": "V", "name": "3" }`, c.String())
+	assert.Equal(t, `{ "type": "V", "name": "3" }`, d.String())
+	assert.Equal(t, `{ "type": "O", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }`, e.String())
 }
 
 func TestGroup(t *testing.T) {
@@ -250,15 +270,14 @@ func TestGroup(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Program", "args": [{ "type": "Group", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "V", "name": "3" }] }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "V", "name": "3" }] }] }`
 
 	// When.
 
-	cod := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Group("Group")
+	root := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V"))
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Group("Group").Tree(&ast).Run(src)
 
 	// Then.
 
@@ -272,18 +291,17 @@ func TestGroup_When_False(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Program", "args": [{ "type": "V", "name": "+" }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "V", "name": "3" }] }] }`
 
 	// When.
 
-	cod := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
-		S("+").Leaf("V"),
+	root := Or(
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group").Undo(),
+		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
 	)
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 
@@ -297,15 +315,14 @@ func TestGroup_Inside_Group(t *testing.T) {
 
 	src := New("abc")
 
-	exp := `{ "type": "Program", "args": [{ "type": "Group", "args": [{ "type": "Group", "args": [{ "type": "L", "name": "b" }] }] }] }`
+	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "Group", "args": [{ "type": "L", "name": "b" }] }] }] }`
 
 	// When.
 
-	cod := And(S("a"), S("b").Leaf("L").Group("Group"), S("c")).Group("Group")
+	root := And(S("a"), S("b").Leaf("L").Group("Group"), S("c")).Group("Group")
 
-	ast := Root("Program")
-
-	ok := ast.Run(src, cod)
+	var ast Ast
+	ok := root.Tree(&ast).Run(src)
 
 	// Then.
 

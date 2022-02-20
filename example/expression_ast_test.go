@@ -29,14 +29,13 @@ func ExampleAst() {
 		return Or(And(term, S("+").Leaf("BinExpr"), expr).Root().Undo(), term).Run(c)
 	}
 
-	ast := Root("Program")
-
 	// When.
 
-	ok := ast.Run(src, expr)
+	var ast Ast
+	ok := MatcherFunc(expr).Tree(&ast).Run(src)
 
-	fmt.Println(printTree(ast, 0))
-	fmt.Println("Result:", calcResult(ast))
+	fmt.Println(printTree(&ast, 0))
+	fmt.Println("Result:", calcResult(&ast))
 	fmt.Println("Ok:", ok)
 
 	// Output:
@@ -65,7 +64,7 @@ func printTree(a *Ast, pad int) string {
 }
 
 func calcResult(a *Ast) int {
-	if a.Type == "Program" {
+	if a.Type == "Root" {
 		res := 0
 		for _, v := range a.Args {
 			res += calcResult(v)

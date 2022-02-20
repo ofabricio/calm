@@ -5,9 +5,26 @@ import (
 	"strings"
 )
 
-// Root creates a starting root AST node.
-func Root(Type string) *Ast {
-	return &Ast{Type: Type}
+// Tree captures an AST by the parent node.
+func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
+	return func(c *Code) bool {
+		if m(c) {
+			*a = *c.ast
+			return true
+		}
+		return false
+	}
+}
+
+// Node captures an AST by the current node.
+func (m MatcherFunc) Node(a *Ast) MatcherFunc {
+	return func(c *Code) bool {
+		if m(c) {
+			*a = *c.ast.Right()
+			return true
+		}
+		return false
+	}
 }
 
 // Leaf creates a leaf AST node.
@@ -28,8 +45,8 @@ func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 // Example: [ 2, +, 4 ] becomes [ + [ 2, 4 ] ].
 func (m MatcherFunc) Root() MatcherFunc {
 	return func(c *Code) bool {
+		parent := c.ast
 		if m(c) {
-			parent := c.ast
 			a := parent.Args[len(parent.Args)-3]
 			o := parent.Args[len(parent.Args)-2]
 			b := parent.Args[len(parent.Args)-1]
@@ -88,9 +105,6 @@ func (m MatcherFunc) Group(Type string) MatcherFunc {
 // if it returns false.
 func (m MatcherFunc) undoAst() MatcherFunc {
 	return MatcherFunc(func(c *Code) bool {
-		if c.ast == nil {
-			return m(c)
-		}
 		// We create a new "Undo" node that is
 		// used to add the next nodes.
 		// On both conditions (true or false) we
@@ -114,12 +128,6 @@ type Ast struct {
 	Args []*Ast
 }
 
-// Run runs the AST parsing.
-func (a *Ast) Run(c *Code, m MatcherFunc) bool {
-	c.ast = a
-	return m.Run(c)
-}
-
 // Left returns the leftmost node.
 func (a *Ast) Left() *Ast {
 	return a.Args[0]
@@ -131,7 +139,7 @@ func (a *Ast) Right() *Ast {
 }
 
 // String returns a JSON string representation of the AST.
-func (a *Ast) String() string {
+func (a Ast) String() string {
 	var name string
 	var args string
 	if a.Name.Text != "" {

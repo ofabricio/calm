@@ -6,7 +6,7 @@ import (
 )
 
 func New(src string) *Code {
-	return &Code{src: src, row: 1, col: 1}
+	return &Code{src: src, row: 1, col: 1, ast: &Ast{Type: "Root"}}
 }
 
 // Equal tests if the string matches
