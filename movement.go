@@ -11,7 +11,13 @@ func Next() MatcherFunc {
 // Next moves to the next character when
 // the current matcher returns true.
 func (m MatcherFunc) Next() MatcherFunc {
-	return And(m, Next())
+	return MatcherFunc(func(c *Code) bool {
+		if m(c) {
+			c.Next()
+			return true
+		}
+		return false
+	}).More()
 }
 
 // Undo sends the cursor back to the

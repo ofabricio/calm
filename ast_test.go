@@ -39,7 +39,7 @@ func TestAst(t *testing.T) {
 	}
 
 	fnDefn = func(c *Code) bool {
-		return And(wz, S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Leave().Run(c)
+		return And(wz, S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
 	}
 
 	var ast Ast
@@ -80,11 +80,11 @@ func TestAst_Expression(t *testing.T) {
 		}
 
 		term = func(c *Code) bool {
-			return Or(And(factor, S("*").Leaf("BinExpr"), term).Root().Undo(), factor).Run(c)
+			return Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor).Run(c)
 		}
 
 		expr = func(c *Code) bool {
-			return Or(And(term, S("+").Leaf("BinExpr"), expr).Root().Undo(), term).Run(c)
+			return Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term).Run(c)
 		}
 
 		var ast Ast
@@ -135,7 +135,7 @@ func TestLeaf_When_False(t *testing.T) {
 	assert.Equal(t, exp, ast.String())
 }
 
-func TestEnterLeave(t *testing.T) {
+func TestEnter_And_Leave_With_And(t *testing.T) {
 
 	// Given.
 
@@ -150,7 +150,7 @@ func TestEnterLeave(t *testing.T) {
 			S("a").Leaf("L").Enter(),
 			S("b").Leaf("L").Enter(),
 			S("c").Leaf("L"),
-		).Leave(),
+		),
 		S("d").Leaf("L"),
 		S("e").Leaf("L"),
 	)
@@ -178,11 +178,11 @@ func TestLeave_When_False(t *testing.T) {
 		And(
 			S("a").Leaf("L").Enter(),
 			S("x").Leaf("L"),
-		).Leave().Undo(),
+		),
 		And(
 			S("a").Leaf("L"),
 			S("b").Leaf("L"),
-		).Leave(),
+		),
 	)
 
 	var ast Ast
@@ -226,7 +226,7 @@ func TestRoot_When_False(t *testing.T) {
 	// When.
 
 	root := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Root().Undo(),
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Root(),
 		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root(),
 	)
 
@@ -296,7 +296,7 @@ func TestGroup_When_False(t *testing.T) {
 	// When.
 
 	root := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group").Undo(),
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
 		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
 	)
 

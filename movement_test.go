@@ -21,7 +21,7 @@ func TestNext(t *testing.T) {
 		{"de", true, Next(), "d"},
 		{"de", true, And(Next(), Next()), "de"},
 		{"de", true, Next().Next(), "de"},
-		{"de", false, Next().Next().Next(), "de"},
+		{"de", true, Next().Next().Next(), "de"},
 	}
 
 	for _, tc := range tt {

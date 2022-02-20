@@ -45,7 +45,7 @@ func expr(e *Expression) MatcherFunc {
 	return func(c *Code) bool {
 		l := &Expression{}
 		r := &Expression{}
-		return Or(And(term(l), S("+"), expr(r)).Undo().On(func(Token) {
+		return Or(And(term(l), S("+"), expr(r)).On(func(Token) {
 			e.L, e.R, e.V = l, r, "+"
 		}), term(e)).Run(c)
 	}
@@ -54,7 +54,7 @@ func expr(e *Expression) MatcherFunc {
 func term(e *Expression) MatcherFunc {
 	l := &Expression{}
 	r := &Expression{}
-	return Or(And(factor(l), S("*"), expr(r)).Undo().On(func(Token) {
+	return Or(And(factor(l), S("*"), expr(r)).On(func(Token) {
 		e.L, e.R, e.V = l, r, "*"
 	}), factor(e))
 }

@@ -460,6 +460,10 @@ Undo sends the cursor back to the
 beginning of the current matcher if it
 returns false.
 
+The code below illustrates `Undo` behavior,
+but there is no need to use `Undo` here
+since `And` already calls `Undo`.
+
 ```go
 c := New("1+2")
 
@@ -682,8 +686,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*"), term).Undo(), factor))
-setExpr(Or(And(term, S("+"), expr).Undo(), term))
+setTerm(Or(And(factor, S("*"), term), factor))
+setExpr(Or(And(term, S("+"), expr), term))
 
 ok := expr.Run(code)
 
@@ -704,11 +708,11 @@ factor = func(c *Code) bool {
 }
 
 term = func(c *Code) bool {
-    return Or(And(factor, S("*"), term).Undo(), factor).Run(c)
+    return Or(And(factor, S("*"), term), factor).Run(c)
 }
 
 expr = func(c *Code) bool {
-    return Or(And(term, S("+"), expr).Undo(), term).Run(c)
+    return Or(And(term, S("+"), expr), term).Run(c)
 }
 
 ok := expr.Run(code)
@@ -820,7 +824,7 @@ Make sure to Leave to a parent node.
 ```go
 src := New("print { 1 } print { 1 } ")
 
-fun := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" } ")).Leave()
+fun := And(S("print").Leaf("FnCall").Enter(), S(" { "), S("1").Leaf("N"), S(" } "))
 cod := And(fun, fun)
 
 ast := Root("Program")
@@ -866,8 +870,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber).Leaf("N")
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Root().Undo(), factor))
-setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Root().Undo(), term))
+setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor))
+setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term))
 
 ast := Root("Program")
 ok := ast.Run(src, expr)
