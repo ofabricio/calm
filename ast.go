@@ -161,9 +161,9 @@ func (a *Ast) Print() string {
 		for _, n := range a.Args {
 			argz = append(argz, n.Print())
 		}
-		args = fmt.Sprintf(` [ %s ]`, strings.Join(argz, ", "))
+		args = fmt.Sprintf(" [ %s ]", strings.Join(argz, ", "))
 	}
-	return fmt.Sprintf(`%s%s%s`, a.Type, name, args)
+	return fmt.Sprintf("%s%s%s", a.Type, name, args)
 }
 
 // Walk traverses an AST.
