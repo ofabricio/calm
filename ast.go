@@ -16,7 +16,7 @@ func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
 	}
 }
 
-// Leaf creates a leaf AST node.
+// Leaf builds a leaf node.
 func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 	return func(c *Code) bool {
 		if ini := c.Mark(); m(c) {
