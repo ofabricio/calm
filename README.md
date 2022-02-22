@@ -809,7 +809,7 @@ For an easier and more advanced way to capture tokens see the [AST](#AST) sectio
 
 You can parse a text into an AST (Abstract Syntax Tree).
 
-An AST node has only three information.
+An AST node has three fields.
 
 - The `Type` field is a string to categorize nodes. You provide this information when building a tree.
 - The `Name` field is of type `Token` and holds information about a captured token (Text, Line, etc).
