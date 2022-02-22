@@ -74,8 +74,82 @@ func main() {
 
 ### Parser
 
-- For a very simple expression parser example see [example/expression_test.go](example/expression_test.go).
-- For a very simple Go code parser example see [example/parser_test.go](example/parser_test.go).
+Example of a very simple parser for Go code.
+
+```go
+package main
+
+import (
+    "fmt"
+    "unicode"
+    . "github.com/ofabricio/calm"
+)
+
+func main() {
+
+    src := New(`
+    // You can edit this code!
+    // Click here and start typing.
+    package main
+
+    import "fmt"
+
+    func main() {
+        fmt.Println("Hello, 世界")
+    }`)
+
+    ws := SOr(" \t").OneToMany()
+    wz := F(unicode.IsSpace).ZeroToMany()
+    name := F(unicode.IsLetter).OneToMany()
+    strg := String(`"`).Leaf("Str")
+
+    comment := And(S("//"), Until(Eq("\n"))).Leaf("Comment")
+    pkgDef := And(S("package").Leaf("Pkg").Enter(), ws, name.Leaf("Name"))
+    impDef := And(S("import").Leaf("Imp").Enter(), ws, strg)
+
+    fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Name"), S("("), strg, S(")")).Group("Call")
+    fnBody := Or(wz.False(), fnCall, wz.False()).ZeroToMany().Group("Body")
+    fnDef := And(S("func").Leaf("Fun").Enter(), ws, name.Leaf("Name"), wz, S("()"), wz,
+        S("{"), fnBody, S("}"))
+
+    root := Or(
+        wz.False(),
+        comment,
+        pkgDef,
+        impDef,
+        fnDef,
+    ).ZeroToMany()
+
+    var ast Ast
+    ok := root.Tree(&ast).Run(src)
+
+    fmt.Println("Ok:", ok)
+    fmt.Println(ast.Print("short"))
+
+    // Output:
+    // Ok: true
+    // Root [
+    //     Comment // You can edit this code!
+    //     Comment // Click here and start typing.
+    //     Pkg package [
+    //         Name main
+    //     ]
+    //     Imp import [
+    //         Str "fmt"
+    //     ]
+    //     Fun func [
+    //         Name main
+    //         Body [
+    //             Call [
+    //                 Pkg fmt
+    //                 Name Println
+    //                 Str "Hello, 世界"
+    //             ]
+    //         ]
+    //     ]
+    // ]
+}
+```
 
 See more examples in the [example](/example) folder.
 
@@ -771,7 +845,7 @@ But from now on we will print using a shorter, nicer form with the `ast.Print()`
 
 ```go
 root := And(S("2"), S("+").Leaf("Op"), S("4"))
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Op + ]
 ```
 
@@ -800,7 +874,7 @@ root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 var ast Ast
 oks := root.Tree(&ast).Run(code)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Val 2, Op +, Val 4 ]
 ```
 
@@ -820,7 +894,7 @@ root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Val 2, Op +, Val 4 ]
 ```
 
@@ -838,7 +912,7 @@ root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val")).Root()
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Op + [ Val 2, Val 4 ] ]
 ```
 
@@ -859,7 +933,7 @@ root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")"
 var ast Ast
 oks := root.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ FnCall print [ Val 1 ] ]
 ```
 
@@ -884,7 +958,7 @@ cod := And(
 var ast Ast
 oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Char a [ Char b ], Char c [ Char d ] ]
 ```
 
@@ -909,7 +983,7 @@ cod := And(
 var ast Ast
 oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Char a [ Char b, Char c ], Char d ]
 ```
 
@@ -928,7 +1002,7 @@ cod := And(
 var ast Ast
 oks := cod.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Letters [ L a, L b ], Numbers [ N 1, N 2 ] ]
 ```
 
@@ -950,7 +1024,7 @@ setExpr(Or(And(term, S("+").Leaf("Expr"), expr).Root(), term))
 var ast Ast
 oks := expr.Tree(&ast).Run(src)
 
-fmt.Println(oks, ast.Print())
+fmt.Println(oks, ast.Print("short-inline"))
 // Root [ Expr + [ Val 2, Expr + [ Expr * [ Val 3, Val 4 ], Expr + [ Val 5, Val 6 ] ] ] ]
 ```
 
