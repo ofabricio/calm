@@ -26,12 +26,12 @@ func ExampleGoCodeParsing() {
 	strg := String(`"`).Leaf("Str")
 
 	comment := And(S("//"), Until(Eq("\n"))).Leaf("Comment")
-	pkgDef := And(S("package").Leaf("PkgDef").Enter(), ws, name.Leaf("Ident"))
-	impDef := And(S("import").Leaf("ImpDef").Enter(), ws, strg)
+	pkgDef := And(S("package").Leaf("Pkg").Enter(), ws, name.Leaf("Name"))
+	impDef := And(S("import").Leaf("Imp").Enter(), ws, strg)
 
-	fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Ident"), S("("), strg, S(")")).Group("FnCall")
+	fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Name"), S("("), strg, S(")")).Group("Call")
 	fnBody := Or(wz.False(), fnCall).ZeroToMany().Group("Body")
-	fnDef := And(S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Ident"), wz, S("()"), wz,
+	fnDef := And(S("func").Leaf("Fun").Enter(), ws, name.Leaf("Name"), wz, S("()"), wz,
 		S("{"), fnBody, wz, S("}"))
 
 	root := Or(
@@ -53,18 +53,18 @@ func ExampleGoCodeParsing() {
 	// Root [
 	//     Comment // You can edit this code!
 	//     Comment // Click here and start typing.
-	//     PkgDef package [
-	//         Ident main
+	//     Pkg package [
+	//         Name main
 	//     ]
-	//     ImpDef import [
+	//     Imp import [
 	//         Str "fmt"
 	//     ]
-	//     FnDef func [
-	//         Ident main
+	//     Fun func [
+	//         Name main
 	//         Body [
-	//             FnCall [
+	//             Call [
 	//                 Pkg fmt
-	//                 Ident Println
+	//                 Name Println
 	//                 Str "Hello, 世界"
 	//             ]
 	//         ]
