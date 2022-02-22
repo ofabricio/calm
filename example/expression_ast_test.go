@@ -9,7 +9,7 @@ import (
 	. "github.com/ofabricio/calm"
 )
 
-func ExampleAst() {
+func ExampleAST() {
 
 	src := New("6+5*(4+3)*2")
 
@@ -31,7 +31,7 @@ func ExampleAst() {
 
 	// When.
 
-	var ast Ast
+	var ast AST
 	ok := MatcherFunc(expr).Tree(&ast).Run(src)
 
 	fmt.Println(printTree(&ast, 0))
@@ -52,7 +52,7 @@ func ExampleAst() {
 	// Ok: true
 }
 
-func printTree(a *Ast, pad int) string {
+func printTree(a *AST, pad int) string {
 	if a == nil {
 		return ""
 	}
@@ -63,7 +63,7 @@ func printTree(a *Ast, pad int) string {
 	return strings.Repeat("-", pad) + " " + a.Name.Text + args
 }
 
-func calcResult(a *Ast) int {
+func calcResult(a *AST) int {
 	if a.Type == "Root" {
 		res := 0
 		for _, v := range a.Args {

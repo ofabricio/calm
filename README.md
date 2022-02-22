@@ -120,7 +120,7 @@ func main() {
         fnDef,
     ).ZeroToMany()
 
-    var ast Ast
+    var ast AST
     ok := root.Tree(&ast).Run(src)
 
     fmt.Println("Ok:", ok)
@@ -829,7 +829,7 @@ Let's take the example below. It has the input text `2+4`.
 code := New("2+4")
 root := And(S("2"), S("+"), S("4"))
 
-var ast Ast
+var ast AST
 oks := root.Tree(&ast).Run(code)
 
 fmt.Println(oks, ast)
@@ -871,7 +871,7 @@ Tree is where you get the AST result.
 code := New("2+4")
 root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 
-var ast Ast
+var ast AST
 oks := root.Tree(&ast).Run(code)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -891,7 +891,7 @@ src := New("2+4")
 
 root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 
-var ast Ast
+var ast AST
 oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -909,7 +909,7 @@ src := New("2+4")
 
 root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val")).Root()
 
-var ast Ast
+var ast AST
 oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -930,7 +930,7 @@ src := New("print(1)")
 
 root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")"))
 
-var ast Ast
+var ast AST
 oks := root.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -955,7 +955,7 @@ cod := And(
     And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")),
 )
 
-var ast Ast
+var ast AST
 oks := cod.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -980,7 +980,7 @@ cod := And(
     S("d").Leaf("Char"),
 )
 
-var ast Ast
+var ast AST
 oks := cod.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -999,7 +999,7 @@ cod := And(
     And(S("1").Leaf("N"), S("2").Leaf("N")).Group("Numbers"),
 )
 
-var ast Ast
+var ast AST
 oks := cod.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))
@@ -1021,7 +1021,7 @@ factor := Or(And(S("("), expr, S(")")), value)
 setTerm(Or(And(factor, S("*").Leaf("Expr"), term).Root(), factor))
 setExpr(Or(And(term, S("+").Leaf("Expr"), expr).Root(), term))
 
-var ast Ast
+var ast AST
 oks := expr.Tree(&ast).Run(src)
 
 fmt.Println(oks, ast.Print("short-inline"))

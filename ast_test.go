@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAst(t *testing.T) {
+func TestAST(t *testing.T) {
 
 	// Given.
 
@@ -42,7 +42,7 @@ func TestAst(t *testing.T) {
 		return And(wz, S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
 	}
 
-	var ast Ast
+	var ast AST
 	ok := fnDefn.Tree(&ast).Run(src)
 
 	// Then.
@@ -51,7 +51,7 @@ func TestAst(t *testing.T) {
 	assert.Equal(t, exp, ast.String())
 }
 
-func TestAst_Expression(t *testing.T) {
+func TestAST_Expression(t *testing.T) {
 
 	// Given.
 
@@ -87,7 +87,7 @@ func TestAst_Expression(t *testing.T) {
 			return Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term).Run(c)
 		}
 
-		var ast Ast
+		var ast AST
 		ok := MatcherFunc(expr).Tree(&ast).Run(src)
 
 		// Then.
@@ -107,7 +107,7 @@ func TestLeaf(t *testing.T) {
 
 	// When.
 
-	var ast Ast
+	var ast AST
 	ok := F(unicode.IsLetter).Leaf("L").OneToMany().Tree(&ast).Run(src)
 
 	// Then.
@@ -126,7 +126,7 @@ func TestLeaf_When_False(t *testing.T) {
 
 	// When.
 
-	var ast Ast
+	var ast AST
 	ok := F(unicode.IsLetter).Leaf("L").OneToMany().Tree(&ast).Run(src)
 
 	// Then.
@@ -154,7 +154,7 @@ func TestChild(t *testing.T) {
 		S("e").Leaf("L"),
 	)
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -183,7 +183,7 @@ func TestEnter_And_Leave_With_And(t *testing.T) {
 		S("e").Leaf("L"),
 	)
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -213,7 +213,7 @@ func TestLeave_When_False(t *testing.T) {
 		),
 	)
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -234,7 +234,7 @@ func TestRoot(t *testing.T) {
 
 	root := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root()
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -258,7 +258,7 @@ func TestRoot_When_False(t *testing.T) {
 		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root(),
 	)
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -279,7 +279,7 @@ func TestGroup(t *testing.T) {
 
 	root := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V"))
 
-	var ast Ast
+	var ast AST
 	ok := root.Group("Group").Tree(&ast).Run(src)
 
 	// Then.
@@ -303,7 +303,7 @@ func TestGroup_When_False(t *testing.T) {
 		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
 	)
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.
@@ -324,7 +324,7 @@ func TestGroup_Inside_Group(t *testing.T) {
 
 	root := And(S("a"), S("b").Leaf("L").Group("Group"), S("c")).Group("Group")
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	// Then.

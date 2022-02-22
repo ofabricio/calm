@@ -8,7 +8,7 @@ import (
 
 func ExamplePrintTree_Short() {
 
-	var ast Ast
+	var ast AST
 	oks := parseExpr(&ast)
 
 	fmt.Println(oks)
@@ -35,7 +35,7 @@ func ExamplePrintTree_Short() {
 
 func ExamplePrintTree_ShortInline() {
 
-	var ast Ast
+	var ast AST
 	oks := parseExpr(&ast)
 
 	fmt.Println(oks)
@@ -48,7 +48,7 @@ func ExamplePrintTree_ShortInline() {
 
 func ExamplePrintTree_Nice() {
 
-	var ast Ast
+	var ast AST
 	oks := parseExpr(&ast)
 
 	fmt.Println(oks)
@@ -61,7 +61,7 @@ func ExamplePrintTree_Nice() {
 
 func ExamplePrintTree_Json() {
 
-	var ast Ast
+	var ast AST
 	oks := parseExpr(&ast)
 
 	fmt.Println(oks)
@@ -122,7 +122,7 @@ func ExamplePrintTree_Json() {
 
 func ExamplePrintTree_JsonInline() {
 
-	var ast Ast
+	var ast AST
 	oks := parseExpr(&ast)
 
 	fmt.Println(oks)
@@ -135,7 +135,7 @@ func ExamplePrintTree_JsonInline() {
 
 func ExamplePrintTree_Json_String_Encoding() {
 
-	var ast Ast
+	var ast AST
 	oks := String(`"`).Leaf("Str").Tree(&ast).Run(New(`"Hello"`))
 
 	fmt.Println(oks)
@@ -146,7 +146,7 @@ func ExamplePrintTree_Json_String_Encoding() {
 	// { "type": "Root", "args": [{ "type": "Str", "name": "\"Hello\"" }] }
 }
 
-func parseExpr(ast *Ast) bool {
+func parseExpr(ast *AST) bool {
 	term, setTerm := Recursive()
 	expr, setExpr := Recursive()
 

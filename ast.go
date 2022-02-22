@@ -5,7 +5,7 @@ import (
 )
 
 // Tree grabs a node by its parent.
-func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
+func (m MatcherFunc) Tree(a *AST) MatcherFunc {
 	return func(c *Code) bool {
 		if m(c) {
 			*a = *c.ast
@@ -19,7 +19,7 @@ func (m MatcherFunc) Tree(a *Ast) MatcherFunc {
 func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 	return func(c *Code) bool {
 		if ini := c.Mark(); m(c) {
-			leaf := &Ast{Type: Type, Name: c.Token(ini, c.Mark())}
+			leaf := &AST{Type: Type, Name: c.Token(ini, c.Mark())}
 			c.ast.Args = append(c.ast.Args, leaf)
 			return true
 		}
@@ -83,7 +83,7 @@ func (m MatcherFunc) Leave() MatcherFunc {
 func (m MatcherFunc) Group(Type string) MatcherFunc {
 	return MatcherFunc(func(c *Code) bool {
 		parent := c.ast
-		group := &Ast{Type: Type}
+		group := &AST{Type: Type}
 		c.ast = group
 		if m(c) {
 			parent.Args = append(parent.Args, group)
@@ -93,10 +93,10 @@ func (m MatcherFunc) Group(Type string) MatcherFunc {
 	}).Leave()
 }
 
-// undoAst sends the AST back to the
+// undoAST sends the AST back to the
 // beginning of the current matcher
 // if it returns false.
-func (m MatcherFunc) undoAst() MatcherFunc {
+func (m MatcherFunc) undoAST() MatcherFunc {
 	return MatcherFunc(func(c *Code) bool {
 		// We create a new "Undo" node that is
 		// used to add the next nodes.
@@ -105,7 +105,7 @@ func (m MatcherFunc) undoAst() MatcherFunc {
 		// the children nodes of "Undo" must be
 		// copied to the parent node when true.
 		parent := c.ast
-		undo := &Ast{Type: "Undo"}
+		undo := &AST{Type: "Undo"}
 		c.ast = undo
 		if m(c) {
 			parent.Args = append(parent.Args, undo.Args...)
@@ -115,38 +115,38 @@ func (m MatcherFunc) undoAst() MatcherFunc {
 	}).Leave()
 }
 
-type Ast struct {
+type AST struct {
 	Type string
 	Name Token
-	Args []*Ast
+	Args []*AST
 }
 
 // Left returns the leftmost node.
-func (a *Ast) Left() *Ast {
+func (a *AST) Left() *AST {
 	return a.Args[0]
 }
 
 // Right returns the rightmost node.
-func (a *Ast) Right() *Ast {
+func (a *AST) Right() *AST {
 	return a.Args[len(a.Args)-1]
 }
 
 // String returns a JSON string representation
 // of the AST.
-func (a Ast) String() string {
+func (a AST) String() string {
 	return a.Print("json-inline")
 }
 
 // Print returns a string representation
 // of the AST given a format.
-func (a *Ast) Print(format string) string {
+func (a *AST) Print(format string) string {
 	var buf bytes.Buffer
 	PrintTree(&buf, format, a)
 	return buf.String()
 }
 
 // Walk traverses an AST.
-func Walk(v Visitor, node *Ast) {
+func Walk(v Visitor, node *AST) {
 	if v = v.Visit(node); v == nil {
 		return
 	}
@@ -157,5 +157,5 @@ func Walk(v Visitor, node *Ast) {
 }
 
 type Visitor interface {
-	Visit(*Ast) Visitor
+	Visit(*AST) Visitor
 }

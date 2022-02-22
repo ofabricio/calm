@@ -42,7 +42,7 @@ func ExampleGoCodeParsing() {
 		fnDef,
 	).ZeroToMany()
 
-	var ast Ast
+	var ast AST
 	ok := root.Tree(&ast).Run(src)
 
 	fmt.Println("Ok:", ok)

@@ -30,5 +30,5 @@ func (m MatcherFunc) Undo() MatcherFunc {
 			return false
 		}
 		return true
-	}).undoAst()
+	}).undoAST()
 }

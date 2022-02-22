@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func PrintTree(out io.Writer, format string, a *Ast) {
+func PrintTree(out io.Writer, format string, a *AST) {
 	switch format {
 	case "json":
 		Walk(&treePrintVisitor{out: out, printer: &treeJsonPrint{}}, a)
@@ -30,7 +30,7 @@ type treePrintVisitor struct {
 	printer treePrinter
 }
 
-func (v *treePrintVisitor) Visit(n *Ast) Visitor {
+func (v *treePrintVisitor) Visit(n *AST) Visitor {
 	pad := strings.Repeat("    ", v.dep)
 	v.printer.WriteOpen(v.out, pad, n)
 	if len(n.Args) > 0 {
@@ -50,7 +50,7 @@ func (v *treePrintVisitor) Visit(n *Ast) Visitor {
 }
 
 type treePrinter interface {
-	WriteOpen(out io.Writer, pad string, n *Ast)
+	WriteOpen(out io.Writer, pad string, n *AST)
 	WriteClose(out io.Writer, pad string)
 	WriteArgsOpen(out io.Writer, pad string)
 	WriteArgsClose(out io.Writer, pad string)
@@ -59,7 +59,7 @@ type treePrinter interface {
 
 type treeShortPrint struct{}
 
-func (treeShortPrint) WriteOpen(out io.Writer, pad string, n *Ast) {
+func (treeShortPrint) WriteOpen(out io.Writer, pad string, n *AST) {
 	fmt.Fprint(out, pad)
 	fmt.Fprintf(out, "%s", n.Type)
 	if n.Name.Text != "" {
@@ -87,7 +87,7 @@ func (treeShortPrint) WriteArgsSep(out io.Writer) {
 
 type treeShortInlinePrint struct{}
 
-func (treeShortInlinePrint) WriteOpen(out io.Writer, pad string, n *Ast) {
+func (treeShortInlinePrint) WriteOpen(out io.Writer, pad string, n *AST) {
 	fmt.Fprintf(out, "%s", n.Type)
 	if n.Name.Text != "" {
 		fmt.Fprintf(out, " %s", n.Name.Text)
@@ -112,7 +112,7 @@ func (treeShortInlinePrint) WriteArgsSep(out io.Writer) {
 
 type treeNicePrint struct{ treeShortInlinePrint }
 
-func (treeNicePrint) WriteOpen(out io.Writer, pad string, n *Ast) {
+func (treeNicePrint) WriteOpen(out io.Writer, pad string, n *AST) {
 	if n.Name.Text != "" {
 		fmt.Fprintf(out, "%s", n.Name.Text)
 	} else {
@@ -122,7 +122,7 @@ func (treeNicePrint) WriteOpen(out io.Writer, pad string, n *Ast) {
 
 type treeJsonPrint struct{}
 
-func (treeJsonPrint) WriteOpen(out io.Writer, pad string, n *Ast) {
+func (treeJsonPrint) WriteOpen(out io.Writer, pad string, n *AST) {
 	fmt.Fprint(out, pad)
 	fmt.Fprint(out, pad)
 	fmt.Fprint(out, "{")
@@ -170,7 +170,7 @@ func (treeJsonPrint) WriteArgsSep(out io.Writer) {
 
 type treeJsonInlinePrint struct{}
 
-func (treeJsonInlinePrint) WriteOpen(out io.Writer, pad string, n *Ast) {
+func (treeJsonInlinePrint) WriteOpen(out io.Writer, pad string, n *AST) {
 	fmt.Fprint(out, "{")
 	fmt.Fprintf(out, ` "type": "%s"`, n.Type)
 	if n.Name.Text != "" {
