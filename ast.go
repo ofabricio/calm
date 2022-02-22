@@ -1,8 +1,7 @@
 package calm
 
 import (
-	"fmt"
-	"strings"
+	"bytes"
 )
 
 // Tree grabs a node by its parent.
@@ -132,38 +131,18 @@ func (a *Ast) Right() *Ast {
 	return a.Args[len(a.Args)-1]
 }
 
-// String returns a JSON string representation of the AST.
+// String returns a JSON string representation
+// of the AST.
 func (a Ast) String() string {
-	var name string
-	var args string
-	if a.Name.Text != "" {
-		name = fmt.Sprintf(`, "name": "%s"`, a.Name.Text)
-	}
-	if len(a.Args) != 0 {
-		var argz []string
-		for _, n := range a.Args {
-			argz = append(argz, n.String())
-		}
-		args = fmt.Sprintf(`, "args": [%s]`, strings.Join(argz, ", "))
-	}
-	return fmt.Sprintf(`{ "type": "%s"%s%s }`, a.Type, name, args)
+	return a.Print("json-inline")
 }
 
-// Print returns a short string representation of the AST.
-func (a *Ast) Print() string {
-	var name string
-	var args string
-	if a.Name.Text != "" {
-		name = " " + a.Name.Text
-	}
-	if len(a.Args) != 0 {
-		var argz []string
-		for _, n := range a.Args {
-			argz = append(argz, n.Print())
-		}
-		args = fmt.Sprintf(" [ %s ]", strings.Join(argz, ", "))
-	}
-	return fmt.Sprintf("%s%s%s", a.Type, name, args)
+// Print returns a string representation
+// of the AST given a format.
+func (a *Ast) Print(format string) string {
+	var buf bytes.Buffer
+	PrintTree(&buf, format, a)
+	return buf.String()
 }
 
 // Walk traverses an AST.
