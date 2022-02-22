@@ -21,7 +21,7 @@ func TestAST(t *testing.T) {
 		D()
 	}`)
 
-	exp := `{ "type": "Root", "args": [{ "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "One" }, { "type": "Args", "args": [{ "type": "Var", "name": "a" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "A" }, { "type": "FnDef", "name": "func", "args": [{ "type": "Name", "name": "Two" }, { "type": "Args", "args": [{ "type": "Var", "name": "b" }, { "type": "Type", "name": "int" }] }, { "type": "Body", "args": [{ "type": "FnCall", "name": "B" }, { "type": "FnCall", "name": "C" }] }] }, { "type": "FnCall", "name": "D" }] }] }] }`
+	exp := "Root [ Func func [ Name One, Args [ Var a, Type int ], Body [ Call A, Func func [ Name Two, Args [ Var b, Type int ], Body [ Call B, Call C ] ], Call D ] ] ]"
 
 	// When.
 
@@ -30,7 +30,7 @@ func TestAST(t *testing.T) {
 	name := F(unicode.IsLetter).OneToMany()
 
 	fnArgs := And(name.Leaf("Var"), ws, name.Leaf("Type")).ZeroToOne()
-	fnCall := And(name.Leaf("FnCall"), S("()"))
+	fnCall := And(name.Leaf("Call"), S("()"))
 
 	var fnDefn, fnBody MatcherFunc
 
@@ -39,7 +39,7 @@ func TestAST(t *testing.T) {
 	}
 
 	fnDefn = func(c *Code) bool {
-		return And(wz, S("func").Leaf("FnDef").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
+		return And(wz, S("func").Leaf("Func").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
 	}
 
 	var ast AST
@@ -48,7 +48,7 @@ func TestAST(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestAST_Expression(t *testing.T) {
@@ -59,10 +59,10 @@ func TestAST_Expression(t *testing.T) {
 		inp string
 		exp string
 	}{
-		{"2+3", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }] }`},
-		{"2+3*4", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }] }] }`},
-		{"2*3+4", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "Value", "name": "3" }] }, { "type": "Value", "name": "4" }] }] }`},
-		{"2*(3+4)*5", `{ "type": "Root", "args": [{ "type": "BinExpr", "name": "*", "args": [{ "type": "Value", "name": "2" }, { "type": "BinExpr", "name": "*", "args": [{ "type": "BinExpr", "name": "+", "args": [{ "type": "Value", "name": "3" }, { "type": "Value", "name": "4" }] }, { "type": "Value", "name": "5" }] }] }] }`},
+		{"2+3", "Root [ BinExpr + [ Value 2, Value 3 ] ]"},
+		{"2+3*4", "Root [ BinExpr + [ Value 2, BinExpr * [ Value 3, Value 4 ] ] ]"},
+		{"2*3+4", "Root [ BinExpr + [ BinExpr * [ Value 2, Value 3 ], Value 4 ] ]"},
+		{"2*(3+4)*5", "Root [ BinExpr * [ Value 2, BinExpr * [ BinExpr + [ Value 3, Value 4 ], Value 5 ] ] ]"},
 	}
 
 	for _, tc := range tt {
@@ -93,7 +93,7 @@ func TestAST_Expression(t *testing.T) {
 		// Then.
 
 		assert.True(t, ok)
-		assert.Equal(t, tc.exp, ast.String())
+		assert.Equal(t, tc.exp, ast.Print("short-inline"))
 	}
 }
 
@@ -103,7 +103,7 @@ func TestLeaf(t *testing.T) {
 
 	src := New("abc")
 
-	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }, { "type": "L", "name": "c" }] }`
+	exp := "Root [ L a, L b, L c ]"
 
 	// When.
 
@@ -113,7 +113,7 @@ func TestLeaf(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestLeaf_When_False(t *testing.T) {
@@ -122,7 +122,7 @@ func TestLeaf_When_False(t *testing.T) {
 
 	src := New("a23")
 
-	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }] }`
+	exp := "Root [ L a ]"
 
 	// When.
 
@@ -132,7 +132,7 @@ func TestLeaf_When_False(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestChild(t *testing.T) {
@@ -141,7 +141,7 @@ func TestChild(t *testing.T) {
 
 	src := New("abcde")
 
-	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b" }, { "type": "L", "name": "c" }] }, { "type": "L", "name": "d" }, { "type": "L", "name": "e" }] }`
+	exp := "Root [ L a [ L b, L c ], L d, L e ]"
 
 	// When.
 
@@ -160,7 +160,7 @@ func TestChild(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestEnter_And_Leave_With_And(t *testing.T) {
@@ -169,7 +169,7 @@ func TestEnter_And_Leave_With_And(t *testing.T) {
 
 	src := New("abcde")
 
-	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a", "args": [{ "type": "L", "name": "b", "args": [{ "type": "L", "name": "c" }] }] }, { "type": "L", "name": "d" }, { "type": "L", "name": "e" }] }`
+	exp := "Root [ L a [ L b [ L c ] ], L d, L e ]"
 
 	// When.
 
@@ -189,7 +189,7 @@ func TestEnter_And_Leave_With_And(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestLeave_When_False(t *testing.T) {
@@ -198,7 +198,7 @@ func TestLeave_When_False(t *testing.T) {
 
 	src := New("ab")
 
-	exp := `{ "type": "Root", "args": [{ "type": "L", "name": "a" }, { "type": "L", "name": "b" }] }`
+	exp := "Root [ L a, L b ]"
 
 	// When.
 
@@ -219,7 +219,7 @@ func TestLeave_When_False(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestRoot(t *testing.T) {
@@ -228,7 +228,7 @@ func TestRoot(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Root", "args": [{ "type": "Op", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }] }`
+	exp := "Root [ Op + [ V 2, V 3 ] ]"
 
 	// When.
 
@@ -240,7 +240,7 @@ func TestRoot(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestRoot_When_False(t *testing.T) {
@@ -249,7 +249,7 @@ func TestRoot_When_False(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Root", "args": [{ "type": "Op", "name": "+", "args": [{ "type": "V", "name": "2" }, { "type": "V", "name": "3" }] }] }`
+	exp := "Root [ Op + [ V 2, V 3 ] ]"
 
 	// When.
 
@@ -264,7 +264,7 @@ func TestRoot_When_False(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestGroup(t *testing.T) {
@@ -273,7 +273,7 @@ func TestGroup(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "V", "name": "3" }] }] }`
+	exp := "Root [ Group [ V 2, Op +, V 3 ] ]"
 
 	// When.
 
@@ -285,7 +285,7 @@ func TestGroup(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestGroup_When_False(t *testing.T) {
@@ -294,7 +294,7 @@ func TestGroup_When_False(t *testing.T) {
 
 	src := New("2+3")
 
-	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "V", "name": "2" }, { "type": "Op", "name": "+" }, { "type": "V", "name": "3" }] }] }`
+	exp := "Root [ Group [ V 2, Op +, V 3 ] ]"
 
 	// When.
 
@@ -309,7 +309,7 @@ func TestGroup_When_False(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }
 
 func TestGroup_Inside_Group(t *testing.T) {
@@ -318,7 +318,7 @@ func TestGroup_Inside_Group(t *testing.T) {
 
 	src := New("abc")
 
-	exp := `{ "type": "Root", "args": [{ "type": "Group", "args": [{ "type": "Group", "args": [{ "type": "L", "name": "b" }] }] }] }`
+	exp := "Root [ Group [ Group [ L b ] ] ]"
 
 	// When.
 
@@ -330,5 +330,5 @@ func TestGroup_Inside_Group(t *testing.T) {
 	// Then.
 
 	assert.True(t, ok)
-	assert.Equal(t, exp, ast.String())
+	assert.Equal(t, exp, ast.Print("short-inline"))
 }

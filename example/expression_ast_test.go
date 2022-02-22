@@ -3,7 +3,6 @@ package example
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"unicode"
 
 	. "github.com/ofabricio/calm"
@@ -13,7 +12,7 @@ func ExampleAST() {
 
 	src := New("6+5*(4+3)*2")
 
-	var term, expr, factor func(c *Code) bool
+	var term, expr, factor MatcherFunc
 
 	value := F(unicode.IsNumber).Leaf("Value")
 
@@ -34,33 +33,28 @@ func ExampleAST() {
 	var ast AST
 	ok := MatcherFunc(expr).Tree(&ast).Run(src)
 
-	fmt.Println(printTree(&ast, 0))
+	fmt.Println(ast.Print("short"))
 	fmt.Println("Result:", calcResult(&ast))
 	fmt.Println("Ok:", ok)
 
 	// Output:
-	// -- +
-	// ---- 6
-	// ---- *
-	// ------ 5
-	// ------ *
-	// -------- +
-	// ---------- 4
-	// ---------- 3
-	// -------- 2
+	// Root [
+	//     BinExpr + [
+	//         Value 6
+	//         BinExpr * [
+	//             Value 5
+	//             BinExpr * [
+	//                 BinExpr + [
+	//                     Value 4
+	//                     Value 3
+	//                 ]
+	//                 Value 2
+	//             ]
+	//         ]
+	//     ]
+	// ]
 	// Result: 76
 	// Ok: true
-}
-
-func printTree(a *AST, pad int) string {
-	if a == nil {
-		return ""
-	}
-	var args string
-	for _, v := range a.Args {
-		args += "\n" + printTree(v, pad+2)
-	}
-	return strings.Repeat("-", pad) + " " + a.Name.Text + args
 }
 
 func calcResult(a *AST) int {
