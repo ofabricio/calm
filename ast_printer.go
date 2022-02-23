@@ -27,170 +27,175 @@ func PrintTree(out io.Writer, format string, a *AST) {
 type treePrintVisitor struct {
 	out     io.Writer
 	dep     int
+	pad     string
 	printer treePrinter
 }
 
 func (v *treePrintVisitor) Visit(n *AST) Visitor {
 	pad := strings.Repeat("    ", v.dep)
-	v.printer.WriteOpen(v.out, pad, n)
+	v.pad = pad
+	v.printer.WriteOpen(v, n)
 	if len(n.Args) > 0 {
-		v.printer.WriteArgsOpen(v.out, pad)
+		v.printer.WriteArgsOpen(v)
 		v.dep++
 		for i, a := range n.Args {
 			if i > 0 {
-				v.printer.WriteArgsSep(v.out)
+				v.printer.WriteArgsSep(v)
 			}
 			Walk(v, a)
 		}
 		v.dep--
-		v.printer.WriteArgsClose(v.out, pad)
+		v.pad = pad
+		v.printer.WriteArgsClose(v)
 	}
-	v.printer.WriteClose(v.out, pad)
+	v.printer.WriteClose(v)
 	return nil
 }
 
 type treePrinter interface {
-	WriteOpen(out io.Writer, pad string, n *AST)
-	WriteClose(out io.Writer, pad string)
-	WriteArgsOpen(out io.Writer, pad string)
-	WriteArgsClose(out io.Writer, pad string)
-	WriteArgsSep(out io.Writer)
+	WriteOpen(*treePrintVisitor, *AST)
+	WriteClose(*treePrintVisitor)
+	WriteArgsOpen(*treePrintVisitor)
+	WriteArgsClose(*treePrintVisitor)
+	WriteArgsSep(*treePrintVisitor)
 }
 
 type treeShortPrint struct{}
 
-func (treeShortPrint) WriteOpen(out io.Writer, pad string, n *AST) {
-	fmt.Fprint(out, pad)
-	fmt.Fprintf(out, "%s", n.Type)
+func (treeShortPrint) WriteOpen(v *treePrintVisitor, n *AST) {
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprintf(v.out, "%s", n.Type)
 	if n.Name.Text != "" {
-		fmt.Fprintf(out, " %s", n.Name.Text)
+		fmt.Fprintf(v.out, " %s", n.Name.Text)
 	}
 }
 
-func (treeShortPrint) WriteArgsOpen(out io.Writer, pad string) {
-	fmt.Fprint(out, " [")
-	fmt.Fprint(out, "\n")
+func (treeShortPrint) WriteArgsOpen(v *treePrintVisitor) {
+	fmt.Fprint(v.out, " [")
+	fmt.Fprint(v.out, "\n")
 }
 
-func (treeShortPrint) WriteArgsClose(out io.Writer, pad string) {
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, "]")
+func (treeShortPrint) WriteArgsClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, "]")
 }
 
-func (treeShortPrint) WriteClose(out io.Writer, pad string) {
-	fmt.Fprint(out, "\n")
+func (treeShortPrint) WriteClose(v *treePrintVisitor) {
+	if v.dep > 0 {
+		fmt.Fprint(v.out, "\n")
+	}
 }
 
-func (treeShortPrint) WriteArgsSep(out io.Writer) {
-	fmt.Fprint(out, "")
+func (treeShortPrint) WriteArgsSep(v *treePrintVisitor) {
+	fmt.Fprint(v.out, "")
 }
 
 type treeShortInlinePrint struct{}
 
-func (treeShortInlinePrint) WriteOpen(out io.Writer, pad string, n *AST) {
-	fmt.Fprintf(out, "%s", n.Type)
+func (treeShortInlinePrint) WriteOpen(v *treePrintVisitor, n *AST) {
+	fmt.Fprintf(v.out, "%s", n.Type)
 	if n.Name.Text != "" {
-		fmt.Fprintf(out, " %s", n.Name.Text)
+		fmt.Fprintf(v.out, " %s", n.Name.Text)
 	}
 }
 
-func (treeShortInlinePrint) WriteArgsOpen(out io.Writer, pad string) {
-	fmt.Fprint(out, " [ ")
+func (treeShortInlinePrint) WriteArgsOpen(v *treePrintVisitor) {
+	fmt.Fprint(v.out, " [ ")
 }
 
-func (treeShortInlinePrint) WriteArgsClose(out io.Writer, pad string) {
-	fmt.Fprint(out, " ]")
+func (treeShortInlinePrint) WriteArgsClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, " ]")
 }
 
-func (treeShortInlinePrint) WriteClose(out io.Writer, pad string) {
-	fmt.Fprint(out, "")
+func (treeShortInlinePrint) WriteClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, "")
 }
 
-func (treeShortInlinePrint) WriteArgsSep(out io.Writer) {
-	fmt.Fprint(out, ", ")
+func (treeShortInlinePrint) WriteArgsSep(v *treePrintVisitor) {
+	fmt.Fprint(v.out, ", ")
 }
 
 type treeNicePrint struct{ treeShortInlinePrint }
 
-func (treeNicePrint) WriteOpen(out io.Writer, pad string, n *AST) {
+func (treeNicePrint) WriteOpen(v *treePrintVisitor, n *AST) {
 	if n.Name.Text != "" {
-		fmt.Fprintf(out, "%s", n.Name.Text)
+		fmt.Fprintf(v.out, "%s", n.Name.Text)
 	} else {
-		fmt.Fprintf(out, "%s", n.Type)
+		fmt.Fprintf(v.out, "%s", n.Type)
 	}
 }
 
 type treeJsonPrint struct{}
 
-func (treeJsonPrint) WriteOpen(out io.Writer, pad string, n *AST) {
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, "{")
-	fmt.Fprint(out, "\n")
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, pad)
-	fmt.Fprintf(out, `    "type": "%s"`, n.Type)
+func (treeJsonPrint) WriteOpen(v *treePrintVisitor, n *AST) {
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, "{")
+	fmt.Fprint(v.out, "\n")
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprintf(v.out, `    "type": "%s"`, n.Type)
 	if n.Name.Text != "" {
 		b, _ := json.Marshal(n.Name.Text)
-		fmt.Fprint(out, ",")
-		fmt.Fprint(out, "\n")
-		fmt.Fprint(out, pad)
-		fmt.Fprint(out, pad)
-		fmt.Fprintf(out, `    "name": %s`, b)
+		fmt.Fprint(v.out, ",")
+		fmt.Fprint(v.out, "\n")
+		fmt.Fprint(v.out, v.pad)
+		fmt.Fprint(v.out, v.pad)
+		fmt.Fprintf(v.out, `    "name": %s`, b)
 	}
 }
 
-func (treeJsonPrint) WriteArgsOpen(out io.Writer, pad string) {
-	fmt.Fprint(out, ",")
-	fmt.Fprint(out, "\n")
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, `    "args": [`)
-	fmt.Fprint(out, "\n")
+func (treeJsonPrint) WriteArgsOpen(v *treePrintVisitor) {
+	fmt.Fprint(v.out, ",")
+	fmt.Fprint(v.out, "\n")
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, `    "args": [`)
+	fmt.Fprint(v.out, "\n")
 }
 
-func (treeJsonPrint) WriteArgsClose(out io.Writer, pad string) {
-	fmt.Fprint(out, "\n")
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, "    ]")
+func (treeJsonPrint) WriteArgsClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, "\n")
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, "    ]")
 }
 
-func (treeJsonPrint) WriteClose(out io.Writer, pad string) {
-	fmt.Fprint(out, "\n")
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, pad)
-	fmt.Fprint(out, "}")
+func (treeJsonPrint) WriteClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, "\n")
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, v.pad)
+	fmt.Fprint(v.out, "}")
 }
 
-func (treeJsonPrint) WriteArgsSep(out io.Writer) {
-	fmt.Fprint(out, ",")
-	fmt.Fprint(out, "\n")
+func (treeJsonPrint) WriteArgsSep(v *treePrintVisitor) {
+	fmt.Fprint(v.out, ",")
+	fmt.Fprint(v.out, "\n")
 }
 
 type treeJsonInlinePrint struct{}
 
-func (treeJsonInlinePrint) WriteOpen(out io.Writer, pad string, n *AST) {
-	fmt.Fprint(out, "{")
-	fmt.Fprintf(out, ` "type": "%s"`, n.Type)
+func (treeJsonInlinePrint) WriteOpen(v *treePrintVisitor, n *AST) {
+	fmt.Fprint(v.out, "{")
+	fmt.Fprintf(v.out, ` "type": "%s"`, n.Type)
 	if n.Name.Text != "" {
 		b, _ := json.Marshal(n.Name.Text)
-		fmt.Fprintf(out, `, "name": %s`, b)
+		fmt.Fprintf(v.out, `, "name": %s`, b)
 	}
 }
 
-func (treeJsonInlinePrint) WriteArgsOpen(out io.Writer, pad string) {
-	fmt.Fprint(out, `, "args": [`)
+func (treeJsonInlinePrint) WriteArgsOpen(v *treePrintVisitor) {
+	fmt.Fprint(v.out, `, "args": [`)
 }
 
-func (treeJsonInlinePrint) WriteArgsClose(out io.Writer, pad string) {
-	fmt.Fprint(out, "]")
+func (treeJsonInlinePrint) WriteArgsClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, "]")
 }
 
-func (treeJsonInlinePrint) WriteClose(out io.Writer, pad string) {
-	fmt.Fprint(out, " }")
+func (treeJsonInlinePrint) WriteClose(v *treePrintVisitor) {
+	fmt.Fprint(v.out, " }")
 }
 
-func (treeJsonInlinePrint) WriteArgsSep(out io.Writer) {
-	fmt.Fprint(out, ", ")
+func (treeJsonInlinePrint) WriteArgsSep(v *treePrintVisitor) {
+	fmt.Fprint(v.out, ", ")
 }
