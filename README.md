@@ -261,8 +261,8 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 - [x] [Debug](#Debug)
 - [x] [String](#String)
-- [x] [Json](#Json)
 - [x] [Number](#Number)
+- [x] [Json](#Json)
 - [x] [Tag](#Tag)
 
 #### Recursion
@@ -717,23 +717,6 @@ ok := root.Run(c)
 fmt.Println(ok, quotes) // true ["Wow!" "This is cool!"]
 ```
 
-### Json
-
-Json matches a json.
-
-```go
-c := New(`Use either { "hello": "world" } or { "foo": "bar" }.`)
-
-var jsons []string
-
-jsns := Json().On(Grabs(&jsons))
-root := Or(jsns, Next()).OneToMany()
-
-ok := root.Run(c)
-
-fmt.Println(ok, jsons) // true [{ "hello": "world" } { "foo": "bar" }]
-```
-
 ### Number
 
 Number matches numbers.
@@ -749,6 +732,23 @@ root := Or(numb, Next()).OneToMany()
 ok := root.Run(c)
 
 fmt.Println(ok, n) // true [3.14159 0 1 1 2 3 2e3]
+```
+
+### Json
+
+Json matches a json.
+
+```go
+c := New(`Use either { "hello": "world" } or { "foo": "bar" }.`)
+
+var jsons []string
+
+jsns := Json().On(Grabs(&jsons))
+root := Or(jsns, Next()).OneToMany()
+
+ok := root.Run(c)
+
+fmt.Println(ok, jsons) // true [{ "hello": "world" } { "foo": "bar" }]
 ```
 
 ### Tag
