@@ -30,9 +30,9 @@ func (m MatcherFunc) Debug() MatcherFunc {
 func Json() MatcherFunc {
 	// BNF from https://www.json.org
 	ws := F(unicode.IsSpace).ZeroToMany()
-	value := MatcherFunc(func(c *Code) bool {
+	value := func(c *Code) bool {
 		return And(ws, Or(S("true"), S("false"), S("null"), Number(), String("\""), Json()), ws).Run(c)
-	})
+	}
 	objField := And(ws, String("\""), ws, S(":"), value)
 	emptyObj := And(S("{"), ws, S("}"))
 	emptyArr := And(S("["), ws, S("]"))
