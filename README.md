@@ -263,6 +263,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [String](#String)
 - [x] [Json](#Json)
 - [x] [Number](#Number)
+- [x] [Tag](#Tag)
 
 #### Recursion
 
@@ -748,6 +749,23 @@ root := Or(numb, Next()).OneToMany()
 ok := root.Run(c)
 
 fmt.Println(ok, n) // true [3.14159 0 1 1 2 3 2e3]
+```
+
+### Tag
+
+Tag matches a tag.
+
+```go
+c := New("Hello, {name}! You have {count} messages!")
+
+var n []string
+
+tags := Tag("{", "}").On(Grabs(&n))
+root := Or(tags, Next()).OneToMany()
+
+ok := root.Run(c)
+
+fmt.Println(ok, n) // true [{name} {count}]
 ```
 
 ### Recursive

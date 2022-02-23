@@ -14,6 +14,13 @@ func String(quote string) MatcherFunc {
 	)
 }
 
+// Tag matches a tag.
+func Tag(open, close string) MatcherFunc {
+	tag, setTag := Recursive()
+	body := Or(Until(Eq(open), Eq(close)), tag)
+	return setTag(And(S(open), body.ZeroToMany(), S(close)))
+}
+
 // Debug prints debug info to the stdout.
 func (m MatcherFunc) Debug() MatcherFunc {
 	return func(c *Code) bool {

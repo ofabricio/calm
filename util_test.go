@@ -141,3 +141,78 @@ func TestMatcherFunc_Number(t *testing.T) {
 		assert.Equal(t, tc.ex, tk, tc.in)
 	}
 }
+
+func TestTag(t *testing.T) {
+
+	tt := []struct {
+		in string
+		ok bool
+		mf MatcherFunc
+		ex string
+	}{
+		{"", false, Tag("<", ">"), ""},
+		{"<", false, Tag("<", ">"), ""},
+		{">", false, Tag("<", ">"), ""},
+		{"[]", false, Tag("<", ">"), ""},
+		{"<a", false, Tag("<", ">"), ""},
+		{"<>", true, Tag("<", ">"), "<>"},
+		{"<a>", true, Tag("<", ">"), "<a>"},
+		{"<a b>", true, Tag("<", ">"), "<a b>"},
+		{"{}", true, Tag("{", "}"), "{}"},
+		{"{ab}", true, Tag("{", "}"), "{ab}"},
+		{"{ab}x", true, Tag("{", "}"), "{ab}"},
+		{"{a{b}c}", true, Tag("{", "}"), "{a{b}c}"},
+		{"{a}{b}", true, Tag("{", "}"), "{a}"},
+		{"{1}{2}", true, Tag("{", "}").OneToMany(), "{1}{2}"},
+		{"{1}{2}{3}", true, Tag("{", "}").OneToMany(), "{1}{2}{3}"},
+		{"{1}{{23}}", true, Tag("{", "}").OneToMany(), "{1}{{23}}"},
+		{"{{{}}}", true, Tag("{", "}").OneToMany(), "{{{}}}"},
+		{"{{a}}", true, Tag("{{", "}}").OneToMany(), "{{a}}"},
+		{"{{{a{{{b}}}cc}}}", true, Tag("{{{", "}}}").OneToMany(), "{{{a{{{b}}}cc}}}"},
+		{"{{{a{{{b}}}cc}}}", true, Tag("{{", "}}").OneToMany(), "{{{a{{{b}}}cc}}"},
+		{"{ab\ncd}", true, Tag("{", "}").OneToMany(), "{ab\ncd}"},
+		{"{a\nb{\nc}d}", true, Tag("{", "}").OneToMany(), "{a\nb{\nc}d}"},
+	}
+
+	for _, tc := range tt {
+
+		c := New(tc.in)
+
+		var tk string
+		ok := tc.mf.On(Grab(&tk)).Run(c)
+
+		assert.Equal(t, tc.ok, ok, tc.in)
+		assert.Equal(t, tc.ex, tk, tc.in)
+	}
+}
+
+func TestTag_Scan(t *testing.T) {
+
+	tt := []struct {
+		in string
+		ok bool
+		mf MatcherFunc
+		ex []string
+	}{
+		{"Hello, {name}! You got {sign}{value}.", true, Tag("{", "}"), []string{"{name}", "{sign}", "{value}"}},
+		{"Empty [] Not [1] Nested [ 1, [2, 3] ].", true, Tag("[", "]"), []string{"[]", "[1]", "[ 1, [2, 3] ]"}},
+		{"print(1, 2); print(1, call()); println('hello', 3)", true, Tag("(", ")"), []string{"(1, 2)", "(1, call())", "('hello', 3)"}},
+		{`Doc { "a": "b" } and subdoc { "a": { "b": 3 } }`, true, Tag("{", "}"), []string{`{ "a": "b" }`, `{ "a": { "b": 3 } }`}},
+		{`<p>Click <a href="#">here</a></p>`, true, Tag("<", ">"), []string{`<p>`, `<a href="#">`, `</a>`, `</p>`}},
+		{"This /* is */ a /* comment */", true, Tag("/*", "*/"), []string{"/* is */", "/* comment */"}},
+		{"This /* is /* a nice */ nested */ comment", true, Tag("/*", "*/"), []string{"/* is /* a nice */ nested */"}},
+	}
+
+	for _, tc := range tt {
+
+		c := New(tc.in)
+
+		var tk []string
+
+		tag := tc.mf.On(Grabs(&tk))
+		oks := Or(tag, Next()).OneToMany().Run(c)
+
+		assert.Equal(t, tc.ok, oks, tc.in)
+		assert.Equal(t, tc.ex, tk, tc.in)
+	}
+}
