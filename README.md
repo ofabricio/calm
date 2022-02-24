@@ -814,14 +814,11 @@ ok := expr.Run(code)
 fmt.Println(ok) // true
 ```
 
-This operator is handy for small validations,
-but it can be a pain when capturing tokens.
+This operator is handy, but it can be a pain when capturing tokens.
 See [here](example/expression_test.go) an example on how to recursively
 parse an expression without using this operator.
 
-For an easier and more advanced way to capture tokens see the [AST](#AST) section.
-
-> Note to self: maybe I should remove this operator.
+But for an easier and more advanced way to capture tokens see the [AST](#AST) section.
 
 ## AST
 
