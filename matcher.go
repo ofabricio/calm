@@ -59,6 +59,14 @@ func Eq(s string) MatcherFunc {
 	}
 }
 
+// EqF tests the current character against a rune
+// function, but does not move the position.
+func EqF(fn func(rune) bool) MatcherFunc {
+	return func(c *Code) bool {
+		return fn(c.Curr())
+	}
+}
+
 // More runs the current matcher only if
 // there are more characters to match.
 func (m MatcherFunc) More() MatcherFunc {

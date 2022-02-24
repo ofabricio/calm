@@ -59,13 +59,14 @@ func TestS_F_R(t *testing.T) {
 	}
 }
 
-func TestEq(t *testing.T) {
+func TestEq_EqF(t *testing.T) {
 
 	tt := []struct {
 		in string
 		ok bool
 		mf MatcherFunc
 	}{
+		// Eq
 		{"", false, Eq("")},
 		{"", false, Eq("a")},
 		{"a", false, Eq("")},
@@ -73,6 +74,11 @@ func TestEq(t *testing.T) {
 		{"b", false, Eq("a")},
 		{"abc", true, Eq("abc")},
 		{"cba", false, Eq("abc")},
+		// EqF
+		{"", false, EqF(unicode.IsLetter)},
+		{"1", false, EqF(unicode.IsLetter)},
+		{"a", true, EqF(unicode.IsLetter)},
+		{"a1", true, And(EqF(unicode.IsLetter), S("a1"))},
 	}
 
 	for _, tc := range tt {

@@ -216,6 +216,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 #### Tester
 
 - [x] [Eq](#Eq)
+- [x] [EqF](#EqF)
 - [x] [More](#More)
 
 #### Logical
@@ -350,6 +351,19 @@ c := New("hello")
 
 a := Eq("hello").Run(c)
 b := Eq("hello").Run(c)
+
+fmt.Println(a, b) // true true
+```
+
+### EqF
+
+EqF tests the current character against a rune function. It does not move the position.
+
+```go
+c := New("H1")
+
+a := EqF(unicode.IsLetter).Run(c)
+b := S("H1").Run(c)
 
 fmt.Println(a, b) // true true
 ```
