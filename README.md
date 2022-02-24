@@ -259,6 +259,7 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 
 #### Util
 
+- [x] [Scan](#Scan)
 - [x] [Debug](#Debug)
 - [x] [String](#String)
 - [x] [Number](#Number)
@@ -686,6 +687,24 @@ c := m.Run(New(`"hello'`))
 fmt.Println(a, b, c) // true true false
 ```
 
+### Scan
+
+Scan scans the input from start to end.
+
+Unlike `Run`, that stops scanning when a matcher returns false,
+`Scan` keeps going up to the end of the input no matter if a
+matcher doesn't match.
+
+```go
+c := New("Hello, {name}! You have {count} messages!")
+
+var n []string
+
+ok := Tag("{", "}").On(Grabs(&n)).Scan(c)
+
+fmt.Println(ok, n) // true [{name} {count}]
+```
+
 ### Debug
 
 Debug prints debug info to the stdout.
@@ -709,10 +728,7 @@ c := New(`They said "Wow!" and "This is cool!" when they saw this.`)
 
 var quotes []string
 
-strg := String(`"`).On(Grabs(&quotes))
-root := Or(strg, Next()).OneToMany()
-
-ok := root.Run(c)
+ok := String(`"`).On(Grabs(&quotes)).Scan(c)
 
 fmt.Println(ok, quotes) // true ["Wow!" "This is cool!"]
 ```
@@ -726,10 +742,7 @@ c := New("Heard of 3.1415? What about 0, 1, 1, 2, 3 sequence? Isn't 2e3 a cool n
 
 var n []string
 
-numb := Number().On(Grabs(&n))
-root := Or(numb, Next()).OneToMany()
-
-ok := root.Run(c)
+ok := Number().On(Grabs(&n)).Scan(c)
 
 fmt.Println(ok, n) // true [3.14159 0 1 1 2 3 2e3]
 ```
@@ -743,10 +756,7 @@ c := New(`Use either { "hello": "world" } or { "foo": "bar" }.`)
 
 var jsons []string
 
-jsns := Json().On(Grabs(&jsons))
-root := Or(jsns, Next()).OneToMany()
-
-ok := root.Run(c)
+ok := Json().On(Grabs(&jsons)).Scan(c)
 
 fmt.Println(ok, jsons) // true [{ "hello": "world" } { "foo": "bar" }]
 ```
@@ -760,10 +770,7 @@ c := New("Hello, {name}! You have {count} messages!")
 
 var n []string
 
-tags := Tag("{", "}").On(Grabs(&n))
-root := Or(tags, Next()).OneToMany()
-
-ok := root.Run(c)
+ok := Tag("{", "}").On(Grabs(&n)).Scan(c)
 
 fmt.Println(ok, n) // true [{name} {count}]
 ```

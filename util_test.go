@@ -209,10 +209,22 @@ func TestTag_Scan(t *testing.T) {
 
 		var tk []string
 
-		tag := tc.mf.On(Grabs(&tk))
-		oks := Or(tag, Next()).OneToMany().Run(c)
+		oks := tc.mf.On(Grabs(&tk)).Scan(c)
 
 		assert.Equal(t, tc.ok, oks, tc.in)
 		assert.Equal(t, tc.ex, tk, tc.in)
 	}
+}
+
+func TestScan(t *testing.T) {
+
+	c := New("aaa")
+
+	var tk []string
+	ok1 := S("a").On(Grabs(&tk)).Scan(c)
+	ok2 := S("a").Scan(c)
+
+	assert.True(t, ok1)
+	assert.Equal(t, []string{"a", "a", "a"}, tk)
+	assert.False(t, ok2)
 }

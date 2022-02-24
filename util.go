@@ -57,3 +57,8 @@ func Number() MatcherFunc {
 	fraction := If(S("."), digits, True())
 	return And(integer, fraction, exponent)
 }
+
+// Scan scans the input from start to end.
+func (m MatcherFunc) Scan(c *Code) bool {
+	return Or(m, Next()).OneToMany().Run(c)
+}
