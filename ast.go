@@ -35,9 +35,8 @@ func (m MatcherFunc) Root() MatcherFunc {
 	return func(c *Code) bool {
 		parent := c.ast
 		if m(c) {
-			a := parent.Args[len(parent.Args)-3]
-			o := parent.Args[len(parent.Args)-2]
-			b := parent.Args[len(parent.Args)-1]
+			args := parent.Args[len(parent.Args)-3:]
+			a, o, b := args[0], args[1], args[2]
 			o.Args = append(o.Args, a, b)
 			parent.Args = append(parent.Args[:len(parent.Args)-3], o)
 			return true
