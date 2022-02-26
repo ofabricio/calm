@@ -38,7 +38,11 @@ func SOr(s string) MatcherFunc {
 // function and moves the position if true.
 func F(fn func(rune) bool) MatcherFunc {
 	return MatcherFunc(func(c *Code) bool {
-		return c.MatchF(fn)
+		if fn(c.Curr()) {
+			c.Next()
+			return true
+		}
+		return false
 	}).More()
 }
 

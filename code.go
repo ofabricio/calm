@@ -30,17 +30,6 @@ func (c *Code) Match(s string) bool {
 	return false
 }
 
-// MatchF tests if f function matches
-// with the current position and
-// advances the position if true.
-func (c *Code) MatchF(f func(rune) bool) bool {
-	if r := c.Curr(); f(r) {
-		c.advanceC(r)
-		return true
-	}
-	return false
-}
-
 // Mark marks the current position.
 func (c *Code) Mark() Mark {
 	return Mark{pos: c.pos, row: c.row, col: c.col}

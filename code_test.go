@@ -2,7 +2,6 @@ package calm
 
 import (
 	"testing"
-	"unicode"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -31,16 +30,6 @@ func TestMatch(t *testing.T) {
 	assert.False(t, c.Match(""))
 }
 
-func TestMatchF(t *testing.T) {
-
-	c := New("ab")
-
-	assert.False(t, c.MatchF(unicode.IsNumber))
-	assert.True(t, c.MatchF(unicode.IsLetter))
-	assert.False(t, c.MatchF(unicode.IsNumber))
-	assert.True(t, c.MatchF(unicode.IsLetter))
-	assert.False(t, c.MatchF(unicode.IsLetter))
-}
 func TestNextTailMore(t *testing.T) {
 
 	s := New("a世c")
