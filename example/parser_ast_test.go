@@ -26,12 +26,12 @@ func ExampleGoCodeParsing() {
 	strg := String(`"`).Leaf("Str")
 
 	comment := And(S("//"), Until(Eq("\n"))).Leaf("Comment")
-	pkgDef := S("package").Leaf("Pkg").Child(ws, name.Leaf("Name"))
-	impDef := S("import").Leaf("Imp").Child(ws, strg)
+	pkgDef := And(S("package").Leaf("Pkg").Enter(), ws, name.Leaf("Name"))
+	impDef := And(S("import").Leaf("Imp").Enter(), ws, strg)
 
 	fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Name"), S("("), strg, S(")")).Group("Call")
 	fnBody := Or(wz.False(), fnCall).ZeroToMany().Group("Body")
-	fnDef := S("func").Leaf("Fun").Child(ws, name.Leaf("Name"), wz, S("()"), wz,
+	fnDef := And(S("func").Leaf("Fun").Enter(), ws, name.Leaf("Name"), wz, S("()"), wz,
 		S("{"), fnBody, wz, S("}"))
 
 	root := Or(

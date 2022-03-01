@@ -17,8 +17,8 @@ func ExampleAST() {
 
 	value := F(unicode.IsNumber).Leaf("Value")
 	factor := Or(And(S("("), expr, S(")")), value)
-	setTerm(Or(Root(factor, S("*").Leaf("Expr"), term).Undo(), factor))
-	setExpr(Or(Root(term, S("+").Leaf("Expr"), expr).Undo(), term))
+	setTerm(Or(Root(factor, S("*").Leaf("Expr"), term), factor))
+	setExpr(Or(Root(term, S("+").Leaf("Expr"), expr), term))
 
 	// When.
 

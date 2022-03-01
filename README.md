@@ -104,12 +104,12 @@ func main() {
     strg := String(`"`).Leaf("Str")
 
     comment := And(S("//"), Until(Eq("\n"))).Leaf("Comment")
-    pkgDef := S("package").Leaf("Pkg").Child( ws, name.Leaf("Name"))
-    impDef := S("import").Leaf("Imp").Child( ws, strg)
+    pkgDef := And(S("package").Leaf("Pkg").Enter(), ws, name.Leaf("Name"))
+    impDef := And(S("import").Leaf("Imp").Enter(), ws, strg)
 
     fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Name"), S("("), strg, S(")")).Group("Call")
     fnBody := Or(wz.False(), fnCall, wz.False()).ZeroToMany().Group("Body")
-    fnDef := S("func").Leaf("Fun").Child( ws, name.Leaf("Name"), wz, S("()"), wz,
+    fnDef := And(S("func").Leaf("Fun").Enter(), ws, name.Leaf("Name"), wz, S("()"), wz,
         S("{"), fnBody, S("}"))
 
     root := Or(
@@ -552,6 +552,10 @@ Undo sends the cursor back to the
 beginning of the current matcher if it
 returns false.
 
+The code below illustrates `Undo` behavior,
+but there is no need to use `Undo` here
+since `And` already calls `Undo`.
+
 ```go
 c := New("1+2")
 
@@ -797,8 +801,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*"), term).Undo(), factor))
-setExpr(Or(And(term, S("+"), expr).Undo(), term))
+setTerm(Or(And(factor, S("*"), term), factor))
+setExpr(Or(And(term, S("+"), expr), term))
 
 ok := expr.Run(code)
 
@@ -819,11 +823,11 @@ factor = func(c *Code) bool {
 }
 
 term = func(c *Code) bool {
-    return Or(And(factor, S("*"), term).Undo(), factor).Run(c)
+    return Or(And(factor, S("*"), term), factor).Run(c)
 }
 
 expr = func(c *Code) bool {
-    return Or(And(term, S("+"), expr).Undo(), term).Run(c)
+    return Or(And(term, S("+"), expr), term).Run(c)
 }
 
 ok := expr.Run(code)
@@ -957,12 +961,10 @@ so the next nodes are added as its children.
 In other words it increases the depth of the tree in that node.
 It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
 
-Remember to always [Leave](#Leave) after an `Enter`.
-
 ```go
 src := New("print(1)")
 
-root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")")).Leave()
+root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")"))
 
 var ast AST
 oks := root.Tree(&ast).Run(src)
@@ -977,14 +979,16 @@ fmt.Println(oks, ast.Print("short-inline"))
 
 Leave is the opposite of [Enter](#Enter).
 Useful to restore an AST depth.
-Leave should be used in a parent node.
+You don't use it directly.
+`And` operator calls it automatically.
+So every time `And` exits the depth is restored.
 
 ```go
 src := New("abcd")
 
 cod := And(
-    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")).Leave(),
-    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")).Leave(),
+    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")),
+    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")),
 )
 
 var ast AST
@@ -999,7 +1003,7 @@ fmt.Println(oks, ast.Print("short-inline"))
 ### Child
 
 Child makes nodes children of a node.
-It is a shorter from of `Enter` + `Leave`.
+It is similar to `Enter` + `Leave`, but it requires no `And`.
 
 ```go
 src := New("abcd")
@@ -1050,8 +1054,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsDigit).Leaf("Val")
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(Root(factor, S("*").Leaf("Expr"), term).Undo(), factor))
-setExpr(Or(Root(term, S("+").Leaf("Expr"), expr).Undo(), term))
+setTerm(Or(Root(factor, S("*").Leaf("Expr"), term), factor))
+setExpr(Or(Root(term, S("+").Leaf("Expr"), expr), term))
 
 var ast AST
 oks := expr.Tree(&ast).Run(src)

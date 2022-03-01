@@ -152,7 +152,7 @@ func parseExpr(ast *AST) bool {
 
 	value := F(unicode.IsDigit).Leaf("Val")
 	factor := Or(And(S("("), expr, S(")")), value)
-	setTerm(Or(Root(factor, S("*").Leaf("Expr"), term).Undo(), factor))
-	setExpr(Or(Root(term, S("+").Leaf("Expr"), expr).Undo(), term))
+	setTerm(Or(Root(factor, S("*").Leaf("Expr"), term), factor))
+	setExpr(Or(Root(term, S("+").Leaf("Expr"), expr), term))
 	return expr.Tree(ast).Run(New("2+3*4+(5+6)"))
 }
