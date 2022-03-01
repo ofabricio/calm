@@ -12,26 +12,18 @@ func ExampleAST() {
 
 	src := New("6+5*(4+3)*2")
 
-	var term, expr, factor MatcherFunc
+	term, setTerm := Recursive()
+	expr, setExpr := Recursive()
 
 	value := F(unicode.IsNumber).Leaf("Value")
-
-	factor = func(c *Code) bool {
-		return Or(And(S("("), expr, S(")")), value).Run(c)
-	}
-
-	term = func(c *Code) bool {
-		return Or(And(factor, S("*").Leaf("BinExpr"), term).Undo().Root(), factor).Run(c)
-	}
-
-	expr = func(c *Code) bool {
-		return Or(And(term, S("+").Leaf("BinExpr"), expr).Undo().Root(), term).Run(c)
-	}
+	factor := Or(And(S("("), expr, S(")")), value)
+	setTerm(Or(And(factor, S("*").Leaf("Expr"), term).Undo().Root(), factor))
+	setExpr(Or(And(term, S("+").Leaf("Expr"), expr).Undo().Root(), term))
 
 	// When.
 
 	var ast AST
-	ok := MatcherFunc(expr).Tree(&ast).Run(src)
+	ok := expr.Tree(&ast).Run(src)
 
 	fmt.Println(ast.Print("short"))
 	fmt.Println("Result:", calcResult(&ast))
@@ -39,12 +31,12 @@ func ExampleAST() {
 
 	// Output:
 	// Root [
-	//     BinExpr + [
+	//     Expr + [
 	//         Value 6
-	//         BinExpr * [
+	//         Expr * [
 	//             Value 5
-	//             BinExpr * [
-	//                 BinExpr + [
+	//             Expr * [
+	//                 Expr + [
 	//                     Value 4
 	//                     Value 3
 	//                 ]

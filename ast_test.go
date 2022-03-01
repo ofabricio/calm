@@ -75,7 +75,7 @@ func TestAST_Expression(t *testing.T) {
 		setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Undo().Root(), term))
 
 		var ast AST
-		ok := MatcherFunc(expr).Tree(&ast).Run(src)
+		ok := expr.Tree(&ast).Run(src)
 
 		// Then.
 
