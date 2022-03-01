@@ -32,15 +32,10 @@ func TestAST(t *testing.T) {
 	fnArgs := And(name.Leaf("Var"), ws, name.Leaf("Type")).ZeroToOne()
 	fnCall := And(name.Leaf("Call"), S("()"))
 
-	var fnDefn, fnBody MatcherFunc
-
-	fnBody = func(c *Code) bool {
-		return Or(wz.False(), fnCall, fnDefn).ZeroToMany().Run(c)
-	}
-
-	fnDefn = func(c *Code) bool {
-		return And(wz, S("func").Leaf("Func").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
-	}
+	fnDefn, setFnDefn := Recursive()
+	fnBody, setFnBody := Recursive()
+	setFnBody(Or(wz.False(), fnCall, fnDefn).ZeroToMany())
+	setFnDefn(And(wz, S("func").Leaf("Func").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz))
 
 	var ast AST
 	ok := fnDefn.Tree(&ast).Run(src)
