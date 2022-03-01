@@ -31,7 +31,8 @@ func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 // In other words, it will set the middle node as a root
 // node and add the left and right nodes as its children.
 // Example: [ 2, +, 4 ] becomes [ + [ 2, 4 ] ].
-func (m MatcherFunc) Root() MatcherFunc {
+func Root(left, root, right MatcherFunc) MatcherFunc {
+	m := And(left, root, right)
 	return func(c *Code) bool {
 		parent := c.ast
 		if m(c) {

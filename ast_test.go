@@ -71,8 +71,8 @@ func TestAST_Expression(t *testing.T) {
 
 		factor := Or(And(S("("), expr, S(")")), value)
 
-		setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Undo().Root(), factor))
-		setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Undo().Root(), term))
+		setTerm(Or(Root(factor, S("*").Leaf("BinExpr"), term).Undo(), factor))
+		setExpr(Or(Root(term, S("+").Leaf("BinExpr"), expr).Undo(), term))
 
 		var ast AST
 		ok := expr.Tree(&ast).Run(src)
@@ -216,7 +216,7 @@ func TestRoot(t *testing.T) {
 
 	// When.
 
-	root := And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root()
+	root := Root(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V"))
 
 	var ast AST
 	ok := root.Tree(&ast).Run(src)
@@ -238,8 +238,8 @@ func TestRoot_When_False(t *testing.T) {
 	// When.
 
 	root := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Undo().Root(),
-		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Undo().Root(),
+		Root(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Undo(),
+		Root(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Undo(),
 	)
 
 	var ast AST

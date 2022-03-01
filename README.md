@@ -939,7 +939,7 @@ node and add the left and right nodes as its children.
 ```go
 src := New("2+4")
 
-root := And(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val")).Root()
+root := Root(S("2").Leaf("Val"), S("+").Leaf("Op"), S("4").Leaf("Val"))
 
 var ast AST
 oks := root.Tree(&ast).Run(src)
@@ -1050,8 +1050,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsDigit).Leaf("Val")
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*").Leaf("Expr"), term).Undo().Root(), factor))
-setExpr(Or(And(term, S("+").Leaf("Expr"), expr).Undo().Root(), term))
+setTerm(Or(Root(factor, S("*").Leaf("Expr"), term).Undo(), factor))
+setExpr(Or(Root(term, S("+").Leaf("Expr"), expr).Undo(), term))
 
 var ast AST
 oks := expr.Tree(&ast).Run(src)
