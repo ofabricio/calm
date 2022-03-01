@@ -50,9 +50,9 @@ func Json() MatcherFunc {
 
 // Number matches numbers.
 func Number() MatcherFunc {
-	integer := And(S("-").ZeroToOne(), F(unicode.IsDigit).OneToMany())
-	sign := SOr("+-").ZeroToOne()
 	digits := F(unicode.IsDigit).OneToMany()
+	integer := And(S("-").ZeroToOne(), digits)
+	sign := SOr("+-").ZeroToOne()
 	exponent := If(SOr("Ee"), And(sign, digits), True())
 	fraction := If(S("."), digits, True())
 	return And(integer, fraction, exponent)
