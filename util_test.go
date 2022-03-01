@@ -41,11 +41,14 @@ func TestMatcherFunc_String(t *testing.T) {
 
 		c := New(tc.in)
 
+		i := c.Mark()
 		var tk string
 		ok := tc.mf.On(Grab(&tk)).Run(c)
+		e := c.Mark()
 
 		assert.Equal(t, tc.ok, ok, tc.in)
 		assert.Equal(t, tc.ex, tk, tc.in)
+		assert.Equal(t, tc.ex, c.Token(i, e).Text, tc.in)
 	}
 }
 
