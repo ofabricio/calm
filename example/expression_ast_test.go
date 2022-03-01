@@ -21,11 +21,11 @@ func ExampleAST() {
 	}
 
 	term = func(c *Code) bool {
-		return Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor).Run(c)
+		return Or(And(factor, S("*").Leaf("BinExpr"), term).Undo().Root(), factor).Run(c)
 	}
 
 	expr = func(c *Code) bool {
-		return Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term).Run(c)
+		return Or(And(term, S("+").Leaf("BinExpr"), expr).Undo().Root(), term).Run(c)
 	}
 
 	// When.

@@ -63,7 +63,7 @@ func (m MatcherFunc) Enter() MatcherFunc {
 
 // Child makes nodes children of a node.
 func (m MatcherFunc) Child(ms ...MatcherFunc) MatcherFunc {
-	return And(m.Enter(), And(ms...))
+	return And(m.Enter(), And(ms...)).Leave()
 }
 
 // Leave is the opposite of Enter. Useful

@@ -29,21 +29,14 @@ func TestAST(t *testing.T) {
 	wz := F(unicode.IsSpace).ZeroToMany()
 	name := F(unicode.IsLetter).OneToMany()
 
+	fnDefn, setFnDef := Recursive()
 	fnArgs := And(name.Leaf("Var"), ws, name.Leaf("Type")).ZeroToOne()
 	fnCall := And(name.Leaf("Call"), S("()"))
-
-	var fnDefn, fnBody MatcherFunc
-
-	fnBody = func(c *Code) bool {
-		return Or(wz.False(), fnCall.Undo(), fnDefn.Undo()).ZeroToMany().Run(c)
-	}
-
-	fnDefn = func(c *Code) bool {
-		return And(wz, S("func").Leaf("Func").Enter(), ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), wz, fnBody.Group("Body"), wz, S("}"), wz).Run(c)
-	}
+	fnBody := Or(wz.False(), fnDefn, fnCall).ZeroToMany()
+	setFnDef(S("func").Leaf("Func").Child(ws, name.Leaf("Name"), wz, S("("), fnArgs.Group("Args"), S(")"), wz, S("{"), fnBody.Group("Body"), S("}"), wz))
 
 	var ast AST
-	ok := fnDefn.Tree(&ast).Run(src)
+	ok := And(wz, fnDefn).Tree(&ast).Run(src)
 
 	// Then.
 
@@ -71,21 +64,15 @@ func TestAST_Expression(t *testing.T) {
 
 		// When.
 
-		var term, expr, factor func(c *Code) bool
+		term, setTerm := Recursive()
+		expr, setExpr := Recursive()
 
 		value := F(unicode.IsNumber).Leaf("Value")
 
-		factor = func(c *Code) bool {
-			return Or(And(S("("), expr, S(")")), value).Run(c)
-		}
+		factor := Or(And(S("("), expr, S(")")), value)
 
-		term = func(c *Code) bool {
-			return Or(And(factor, S("*").Leaf("BinExpr"), term).Root(), factor).Run(c)
-		}
-
-		expr = func(c *Code) bool {
-			return Or(And(term, S("+").Leaf("BinExpr"), expr).Root(), term).Run(c)
-		}
+		setTerm(Or(And(factor, S("*").Leaf("BinExpr"), term).Undo().Root(), factor))
+		setExpr(Or(And(term, S("+").Leaf("BinExpr"), expr).Undo().Root(), term))
 
 		var ast AST
 		ok := MatcherFunc(expr).Tree(&ast).Run(src)
@@ -178,7 +165,7 @@ func TestEnter_And_Leave_With_And(t *testing.T) {
 			S("a").Leaf("L").Enter(),
 			S("b").Leaf("L").Enter(),
 			S("c").Leaf("L"),
-		),
+		).Leave(),
 		S("d").Leaf("L"),
 		S("e").Leaf("L"),
 	)
@@ -206,11 +193,8 @@ func TestLeave_When_False(t *testing.T) {
 		And(
 			S("a").Leaf("L").Enter(),
 			S("x").Leaf("L"),
-		),
-		And(
-			S("a").Leaf("L"),
-			S("b").Leaf("L"),
-		),
+		).Leave(),
+		S("b").Leaf("L"),
 	)
 
 	var ast AST
@@ -254,8 +238,8 @@ func TestRoot_When_False(t *testing.T) {
 	// When.
 
 	root := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Root(),
-		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Root(),
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Undo().Root(),
+		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Undo().Root(),
 	)
 
 	var ast AST
@@ -299,7 +283,7 @@ func TestGroup_When_False(t *testing.T) {
 	// When.
 
 	root := Or(
-		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
+		And(S("2").Leaf("V"), S("*").Leaf("Op"), S("3").Leaf("V")).Group("Group").Undo(),
 		And(S("2").Leaf("V"), S("+").Leaf("Op"), S("3").Leaf("V")).Group("Group"),
 	)
 
