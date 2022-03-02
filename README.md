@@ -800,8 +800,8 @@ expr, setExpr := Recursive()
 
 value := F(unicode.IsNumber)
 factor := Or(And(S("("), expr, S(")")), value)
-setTerm(Or(And(factor, S("*"), term), factor))
-setExpr(Or(And(term, S("+"), expr), term))
+setTerm(Or(Root(factor, S("*"), term), factor))
+setExpr(Or(Root(term, S("+"), expr), term))
 
 ok := expr.Run(code)
 
@@ -822,11 +822,11 @@ factor = func(c *Code) bool {
 }
 
 term = func(c *Code) bool {
-    return Or(And(factor, S("*"), term), factor).Run(c)
+    return Or(Root(factor, S("*"), term), factor).Run(c)
 }
 
 expr = func(c *Code) bool {
-    return Or(And(term, S("+"), expr), term).Run(c)
+    return Or(Root(term, S("+"), expr), term).Run(c)
 }
 
 ok := expr.Run(code)
