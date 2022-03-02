@@ -7,7 +7,7 @@ import (
 
 // String matches a string text given a quote.
 func String(quote string) MatcherFunc {
-	return And(
+	return AND(
 		S(quote),
 		Until(S(`\`+quote).False(), Eq(quote), Eq("\n")).True(),
 		S(quote),
@@ -18,7 +18,7 @@ func String(quote string) MatcherFunc {
 func Tag(open, close string) MatcherFunc {
 	tag, setTag := Recursive()
 	body := Or(Until(Eq(open), Eq(close)), tag)
-	return setTag(And(S(open), body.ZeroToMany(), S(close)))
+	return setTag(AND(S(open), body.ZeroToMany(), S(close)))
 }
 
 // Debug prints debug info to the stdout.
@@ -38,13 +38,13 @@ func Json() MatcherFunc {
 	// BNF from https://www.json.org
 	ws := F(unicode.IsSpace).ZeroToMany()
 	value := func(c *Code) bool {
-		return And(ws, Or(S("true"), S("false"), S("null"), Number(), String("\""), Json()), ws).Run(c)
+		return AND(ws, Or(S("true"), S("false"), S("null"), Number(), String("\""), Json()), ws).Run(c)
 	}
-	objField := And(ws, String("\""), ws, S(":"), value)
-	emptyObj := And(S("{"), ws, S("}"))
-	emptyArr := And(S("["), ws, S("]"))
-	obj := And(S("{"), objField, And(S(","), objField).ZeroToMany(), S("}"))
-	arr := And(S("["), value, And(S(","), value).ZeroToMany(), S("]"))
+	objField := AND(ws, String("\""), ws, S(":"), value)
+	emptyObj := AND(S("{"), ws, S("}"))
+	emptyArr := AND(S("["), ws, S("]"))
+	obj := AND(S("{"), objField, AND(S(","), objField).ZeroToMany(), S("}"))
+	arr := AND(S("["), value, AND(S(","), value).ZeroToMany(), S("]"))
 	return Or(emptyObj, obj, emptyArr, arr)
 }
 
@@ -55,7 +55,7 @@ func Number() MatcherFunc {
 	sign := SOr("+-").ZeroToOne()
 	exponent := If(SOr("Ee"), And(sign, digits), True())
 	fraction := If(S("."), digits, True())
-	return And(integer, fraction, exponent)
+	return AND(integer, fraction, exponent)
 }
 
 // Scan scans the input from start to end.

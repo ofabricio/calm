@@ -108,7 +108,7 @@ func main() {
     impDef := S("import").Leaf("Imp").Child(ws, strg)
 
     fnCall := And(name.Leaf("Pkg"), S("."), name.Leaf("Name"), S("("), strg, S(")")).Group("Call")
-    fnBody := Or(wz.False(), fnCall, wz.False()).ZeroToMany().Group("Body")
+    fnBody := Or(wz.False(), fnCall).ZeroToMany().Group("Body")
     fnDefn := S("func").Leaf("Fun").Child(ws, name.Leaf("Name"), wz, S("()"), wz, S("{"), fnBody, S("}"))
 
     root := Or(
@@ -397,6 +397,8 @@ ok := And(S("hello"), S(" "), S("world")).Run(c)
 fmt.Println(ok) // true
 ```
 
+There is also the `AND` operator. It is like `And`, but it calls [Undo](#Undo).
+
 ### Not
 
 Not negates the current operator. True becomes false and vice-versa.
@@ -550,10 +552,6 @@ There is also a static version of `Next`.
 Undo sends the cursor back to the
 beginning of the current matcher if it
 returns false.
-
-The code below illustrates `Undo` behavior,
-but there is no need to use `Undo` here
-since `And` already calls `Undo`.
 
 ```go
 c := New("1+2")
@@ -963,7 +961,7 @@ It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
 ```go
 src := New("print(1)")
 
-root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")"))
+root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")")).Leave()
 
 var ast AST
 oks := root.Tree(&ast).Run(src)
@@ -986,8 +984,8 @@ So every time `And` exits the depth is restored.
 src := New("abcd")
 
 cod := And(
-    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")),
-    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")),
+    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")).Leave(),
+    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")).Leave(),
 )
 
 var ast AST

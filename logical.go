@@ -16,14 +16,19 @@ func Or(ms ...MatcherFunc) MatcherFunc {
 // And tests each matcher and returns
 // true if all of them return true.
 func And(ms ...MatcherFunc) MatcherFunc {
-	return MatcherFunc(func(c *Code) bool {
+	return func(c *Code) bool {
 		for _, m := range ms {
 			if !m(c) {
 				return false
 			}
 		}
 		return true
-	}).Undo()
+	}
+}
+
+// AND is like And, but it calls Undo.
+func AND(ms ...MatcherFunc) MatcherFunc {
+	return And(ms...).Undo()
 }
 
 // Not negates the current matcher. True

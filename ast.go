@@ -32,14 +32,16 @@ func (m MatcherFunc) Leaf(Type string) MatcherFunc {
 // node and add the left and right nodes as its children.
 // Example: [ 2, +, 4 ] becomes [ + [ 2, 4 ] ].
 func Root(left, root, right MatcherFunc) MatcherFunc {
-	m := And(left, root, right)
+	m := AND(left, root, right)
 	return func(c *Code) bool {
 		parent := c.ast
 		if m(c) {
-			args := parent.Args[len(parent.Args)-3:]
-			a, o, b := args[0], args[1], args[2]
-			o.Args = append(o.Args, a, b)
-			parent.Args = append(parent.Args[:len(parent.Args)-3], o)
+			if len(parent.Args) >= 3 {
+				args := parent.Args[len(parent.Args)-3:]
+				a, o, b := args[0], args[1], args[2]
+				o.Args = append(o.Args, a, b)
+				parent.Args = append(parent.Args[:len(parent.Args)-3], o)
+			}
 			return true
 		}
 		return false
@@ -64,7 +66,7 @@ func (m MatcherFunc) Enter() MatcherFunc {
 
 // Child makes nodes children of a node.
 func (m MatcherFunc) Child(ms ...MatcherFunc) MatcherFunc {
-	return And(m.Enter(), And(ms...))
+	return And(m.Enter(), And(ms...)).Leave()
 }
 
 // Leave is the opposite of Enter. Useful

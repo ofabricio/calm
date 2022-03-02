@@ -30,8 +30,8 @@ func TestRecursive(t *testing.T) {
 
 		value := F(unicode.IsNumber)
 		factor := Or(And(S("("), expr, S(")")), value)
-		setTerm(Or(And(factor, S("*"), term), factor))
-		setExpr(Or(And(term, S("+"), expr), term))
+		setTerm(Or(Root(factor, S("*"), term), factor))
+		setExpr(Or(Root(term, S("+"), expr), term))
 
 		ok := And(expr, Next().Not()).Run(c)
 
