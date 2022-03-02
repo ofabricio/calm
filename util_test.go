@@ -95,10 +95,12 @@ func TestJson(t *testing.T) {
 		{`{ "a": [2], "b": { "c": 3 } }`, true},
 		{`{ "a": { "b": { "c": "d" } } }`, true},
 		{`{ "a": { "b": { "c": [] } } }`, true},
+		{`{ "a": { "b": { "c": [], "d": [] } } }`, true},
 		// Invalid.
 		{`[`, false},
 		{`{`, false},
 		{`{ "a": 1, "b": { "c": 2 }`, false},
+		{`{ "a": 1, }`, false},
 		{`[1, 2`, false},
 	}
 

@@ -24,16 +24,15 @@ func Tag(open, close string) MatcherFunc {
 // Json matches a Json.
 func Json() MatcherFunc {
 	// BNF from https://www.json.org
-	ws := F(unicode.IsSpace).ZeroToMany()
-	value := func(c *Code) bool {
-		return AND(ws, Or(S("true"), S("false"), S("null"), Number(), String("\""), Json()), ws).Run(c)
-	}
-	objField := AND(ws, String("\""), ws, S(":"), value)
-	emptyObj := AND(S("{"), ws, S("}"))
-	emptyArr := AND(S("["), ws, S("]"))
+	jsn, setJsn := Recursive()
+	wz := F(unicode.IsSpace).ZeroToMany()
+	value := And(wz, Or(S("true"), S("false"), S("null"), Number(), String("\""), jsn), wz)
+	objField := And(wz, String("\""), wz, S(":"), value)
+	emptyObj := AND(S("{"), wz, S("}"))
+	emptyArr := AND(S("["), wz, S("]"))
 	obj := AND(S("{"), objField, AND(S(","), objField).ZeroToMany(), S("}"))
 	arr := AND(S("["), value, AND(S(","), value).ZeroToMany(), S("]"))
-	return Or(emptyObj, obj, emptyArr, arr)
+	return setJsn(Or(emptyObj, obj, emptyArr, arr))
 }
 
 // Number matches a number.
