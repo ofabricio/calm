@@ -746,7 +746,7 @@ fmt.Println(ok, quotes) // true ["Wow!" "This is cool!"]
 
 ### Number
 
-Number matches numbers.
+Number matches a number.
 
 ```go
 c := New("Heard of 3.1415? What about 0, 1, 1, 2, 3 sequence? Isn't 2e3 a cool notation?")

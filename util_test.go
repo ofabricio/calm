@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMatcherFunc_String(t *testing.T) {
+func TestString(t *testing.T) {
 
 	tt := []struct {
 		in string
@@ -112,7 +112,7 @@ func TestJson(t *testing.T) {
 	}
 }
 
-func TestMatcherFunc_Number(t *testing.T) {
+func TestNumber(t *testing.T) {
 
 	tt := []struct {
 		in string

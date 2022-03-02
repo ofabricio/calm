@@ -21,18 +21,6 @@ func Tag(open, close string) MatcherFunc {
 	return setTag(AND(S(open), body.ZeroToMany(), S(close)))
 }
 
-// Debug prints debug info to the stdout.
-func (m MatcherFunc) Debug() MatcherFunc {
-	return func(c *Code) bool {
-		ini := c.Mark()
-		okz := m(c)
-		end := c.Mark()
-		tkn := c.Token(ini, end)
-		fmt.Printf("[debug] Match: %-5t Token: %-3s Pos: %d Row: %d Col: %d\n", okz, "'"+tkn.Text+"'", tkn.Pos, tkn.Row, tkn.Col)
-		return okz
-	}
-}
-
 // Json matches a Json.
 func Json() MatcherFunc {
 	// BNF from https://www.json.org
@@ -48,7 +36,7 @@ func Json() MatcherFunc {
 	return Or(emptyObj, obj, emptyArr, arr)
 }
 
-// Number matches numbers.
+// Number matches a number.
 func Number() MatcherFunc {
 	digits := F(unicode.IsDigit).OneToMany()
 	integer := And(S("-").ZeroToOne(), digits)
@@ -56,6 +44,18 @@ func Number() MatcherFunc {
 	exponent := If(SOr("Ee"), And(sign, digits), True())
 	fraction := If(S("."), digits, True())
 	return AND(integer, fraction, exponent)
+}
+
+// Debug prints debug info to the stdout.
+func (m MatcherFunc) Debug() MatcherFunc {
+	return func(c *Code) bool {
+		ini := c.Mark()
+		okz := m(c)
+		end := c.Mark()
+		tkn := c.Token(ini, end)
+		fmt.Printf("[debug] Match: %-5t Token: %-3s Pos: %d Row: %d Col: %d\n", okz, "'"+tkn.Text+"'", tkn.Pos, tkn.Row, tkn.Col)
+		return okz
+	}
 }
 
 // Scan scans the input from start to end.
