@@ -48,12 +48,12 @@ func Root(left, root, right MatcherFunc) MatcherFunc {
 	}
 }
 
-// Enter makes the selected node a root node,
+// enter makes the selected node a root node,
 // so the next nodes are added as its children.
 // In other words it increases the depth of the
-// tree in that node. Enter is usually used on
-// a Leaf node, for example .Leaf("Func").Enter()
-func (m MatcherFunc) Enter() MatcherFunc {
+// tree in that node. enter is usually used on
+// a Leaf node, for example .Leaf("Func").enter()
+func (m MatcherFunc) enter() MatcherFunc {
 	return func(c *Code) bool {
 		if m(c) {
 			parent := c.ast
@@ -66,13 +66,13 @@ func (m MatcherFunc) Enter() MatcherFunc {
 
 // Child makes nodes children of a node.
 func (m MatcherFunc) Child(ms ...MatcherFunc) MatcherFunc {
-	return And(m.Enter(), And(ms...)).Leave()
+	return And(m.enter(), And(ms...)).leave()
 }
 
-// Leave is the opposite of Enter. Useful
+// leave is the opposite of Enter. Useful
 // to restore an AST depth. Make sure to
-// Leave to a parent node.
-func (m MatcherFunc) Leave() MatcherFunc {
+// leave to a parent node.
+func (m MatcherFunc) leave() MatcherFunc {
 	return func(c *Code) bool {
 		parent := c.ast
 		ok := m(c)
@@ -92,7 +92,7 @@ func (m MatcherFunc) Group(Type string) MatcherFunc {
 			return true
 		}
 		return false
-	}).Leave()
+	}).leave()
 }
 
 // undoAST sends the AST back to the
@@ -114,7 +114,7 @@ func (m MatcherFunc) undoAST() MatcherFunc {
 			return true
 		}
 		return false
-	}).Leave()
+	}).leave()
 }
 
 type AST struct {

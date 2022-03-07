@@ -275,8 +275,6 @@ If there was no match the cursor would stay on the `W` character and `S` would r
 - [x] [Tree](#Tree)
 - [x] [Leaf](#Leaf)
 - [x] [Root](#Root)
-- [x] [Enter](#Enter)
-- [x] [Leave](#Leave)
 - [x] [Child](#Child)
 - [x] [Group](#Group)
 
@@ -951,56 +949,9 @@ fmt.Println(oks, ast.Print("short-inline"))
 
 > Note to self: maybe this operator needs a better name.
 
-### Enter
-
-Enter makes the selected [Leaf](#Leaf) node a root node,
-so the next nodes are added as its children.
-In other words it increases the depth of the tree in that node.
-It is usually used on a [Leaf](#Leaf) node, for example `.Leaf("Func").Enter()`.
-
-```go
-src := New("print(1)")
-
-root := And(S("print").Leaf("FnCall").Enter(), S("("), S("1").Leaf("Val"), S(")")).Leave()
-
-var ast AST
-oks := root.Tree(&ast).Run(src)
-
-fmt.Println(oks, ast.Print("short-inline"))
-// Root [ FnCall print [ Val 1 ] ]
-```
-
-> Note to self: maybe this operator needs a better name.
-
-### Leave
-
-Leave is the opposite of [Enter](#Enter).
-Useful to restore an AST depth.
-You don't use it directly.
-`And` operator calls it automatically.
-So every time `And` exits the depth is restored.
-
-```go
-src := New("abcd")
-
-cod := And(
-    And(S("a").Leaf("Char").Enter(), S("b").Leaf("Char")).Leave(),
-    And(S("c").Leaf("Char").Enter(), S("d").Leaf("Char")).Leave(),
-)
-
-var ast AST
-oks := cod.Tree(&ast).Run(src)
-
-fmt.Println(oks, ast.Print("short-inline"))
-// Root [ Char a [ Char b ], Char c [ Char d ] ]
-```
-
-> Note to self: maybe this operator needs a better name.
-
 ### Child
 
 Child makes nodes children of a node.
-It is similar to `Enter` + `Leave`, but it requires no `And`.
 
 ```go
 src := New("abcd")

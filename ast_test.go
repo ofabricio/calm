@@ -162,10 +162,10 @@ func TestEnter_And_Leave_With_And(t *testing.T) {
 
 	root := And(
 		And(
-			S("a").Leaf("L").Enter(),
-			S("b").Leaf("L").Enter(),
+			S("a").Leaf("L").enter(),
+			S("b").Leaf("L").enter(),
 			S("c").Leaf("L"),
-		).Leave(),
+		).leave(),
 		S("d").Leaf("L"),
 		S("e").Leaf("L"),
 	)
@@ -191,9 +191,9 @@ func TestLeave_When_False(t *testing.T) {
 
 	root := Or(
 		And(
-			S("a").Leaf("L").Enter(),
+			S("a").Leaf("L").enter(),
 			S("x").Leaf("L"),
-		).Leave(),
+		).leave(),
 		S("b").Leaf("L"),
 	)
 
