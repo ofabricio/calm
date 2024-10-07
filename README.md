@@ -6,9 +6,7 @@ This is a library to scan, parse and tokenize text.
 
 ### Note
 
-Use [issues](https://github.com/ofabricio/calm/issues) only to report bugs.
-Use [discussions](https://github.com/ofabricio/calm/discussions) for everything else.
-Don't open PRs.
+You might want to check a higher abstraction of this library: https://github.com/ofabricio/bnf
 
 ## Examples
 
